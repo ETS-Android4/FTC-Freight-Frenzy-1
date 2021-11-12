@@ -59,7 +59,7 @@ public class PickupPosition extends OpenCvPipeline {
         numContoursFound = contoursList.size();
         input.copyTo(contoursOnFrame);
         Imgproc.drawContours(contoursOnFrame, contoursList, -1, new Scalar(0, 0, 255), 3, 8);
-        telemetry.addData("contours", numContoursFound);
+        telemetry.addData("Total Contours", numContoursFound);
         telemetry.update();
 
 
@@ -67,35 +67,39 @@ public class PickupPosition extends OpenCvPipeline {
         for (Mat contour : contoursList) {
             double area = Imgproc.contourArea(contour);
             double sqrtArea = Math.sqrt(area);
-//            System.out.printf("Area: %f\n", area);
             telemetry.addData("Area", area);
 
 //            todo: add condition that checks if there is already a contour rectangle found
 //            todo: only one should be included at max
-//            if (sqrtArea > someLowerValueOfArea && sqrtArea < someUpperValueOfArea) {
+//            && sqrtArea < 90
+            if (sqrtArea > 20) {
                 contourRects.add(Imgproc.boundingRect(contour));
-//            }
+            }
         }
 
-        if (contourRects.size() > 0) {
+        if (contourRects.size() == 1) {
             telemetry.addData("Found blocks", contourRects.size());
             telemetry.update();
         }
 
-        // todo: replace contour.get(0)
-        Imgproc.rectangle(contoursOnFrame, contourRects.get(0), new Scalar(255, 0, 0), 2);
-        double halfwayPoint = contourRects.get(0).x + .5 * contourRects.get(0).width;
-        double centerOffset = input.cols() / 2 - halfwayPoint;
-        Imgproc.putText(
-                contoursOnFrame,
-                Integer.toString((int) centerOffset),
-                new Point(
-                        30,
-                        50),
-                Imgproc.FONT_HERSHEY_PLAIN,
-                3,
-                new Scalar(128, 0, 128),
-                6);
+        for (int i=0; i < contourRects.size(); i++) {
+            Imgproc.rectangle(contoursOnFrame, contourRects.get(i), new Scalar(255, 0, 0), 2);
+            double halfwayPoint = contourRects.get(i).x + .5 * contourRects.get(i).width;
+            double centerOffset = input.cols() / 2 - halfwayPoint;
+
+            Imgproc.putText(
+                    contoursOnFrame,
+                    Integer.toString(contourRects.size()),
+                    new Point(
+                            30,
+                            50),
+                    Imgproc.FONT_HERSHEY_PLAIN,
+                    3,
+                    new Scalar(128, 0, 128),
+                    6);
+
+            telemetry.addData("Pixels to rotate", centerOffset);
+        }
 
         switch (stageToRenderToViewport) {
             case YCbCr_CHAN2: {

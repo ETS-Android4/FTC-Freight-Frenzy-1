@@ -38,7 +38,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
 @TeleOp(name="HoloDrive")
-//@Disabled
+@Disabled
 public class test extends OpMode
 {
     // Declare OpMode members.
