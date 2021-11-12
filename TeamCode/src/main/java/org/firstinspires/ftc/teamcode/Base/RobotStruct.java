@@ -4,9 +4,9 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.teamcode.InitCV;
-import org.firstinspires.ftc.teamcode.pipelines.PickupPosition;
-import org.openftc.easyopencv.OpenCvInternalCamera;
+//import org.firstinspires.ftc.teamcode.InitCV;
+//import org.firstinspires.ftc.teamcode.pipelines.PickupPosition;
+//import org.openftc.easyopencv.OpenCvInternalCamera;
 
 public class RobotStruct extends OpMode {
     DcMotor motorFrontRight;
@@ -17,7 +17,7 @@ public class RobotStruct extends OpMode {
     DcMotorEx motorArm;
     DcMotorEx motorArmDuo;
     Servo servoClaw;
-    OpenCvInternalCamera phoneCam;
+//    OpenCvInternalCamera phoneCam;
 
     @Override
     public void init() {
@@ -36,9 +36,9 @@ public class RobotStruct extends OpMode {
         motorBackRight.setDirection(DcMotor.Direction.REVERSE);
         motorFrontRight.setDirection(DcMotor.Direction.REVERSE);
 
-        InitCV DC_CV = new InitCV();
-        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-        DC_CV.init(new PickupPosition(telemetry), cameraMonitorViewId);
+//        InitCV DC_CV = new InitCV();
+//        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+//        DC_CV.init(new PickupPosition(telemetry), cameraMonitorViewId);
     }
 
     @Override

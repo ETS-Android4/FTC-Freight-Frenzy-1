@@ -54,7 +54,7 @@ public class PickupPosition extends OpenCvPipeline {
         contoursList.clear();
         Imgproc.cvtColor(input, MATRIX_BOX, Imgproc.COLOR_RGB2YCrCb);
         Core.extractChannel(MATRIX_BOX, MATRIX_BOX, 1);
-        Imgproc.threshold(MATRIX_BOX, THRESHOLD, 150, 255, Imgproc.THRESH_BINARY);
+        Imgproc.threshold(MATRIX_BOX, THRESHOLD, 140, 255, Imgproc.THRESH_BINARY);
         Imgproc.findContours(THRESHOLD, contoursList, new Mat(), Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
         numContoursFound = contoursList.size();
         input.copyTo(contoursOnFrame);
@@ -67,12 +67,12 @@ public class PickupPosition extends OpenCvPipeline {
         for (Mat contour : contoursList) {
             double area = Imgproc.contourArea(contour);
             double sqrtArea = Math.sqrt(area);
-            telemetry.addData("Area", area);
 
 //            todo: add condition that checks if there is already a contour rectangle found
 //            todo: only one should be included at max
 //            && sqrtArea < 90
             if (sqrtArea > 20) {
+                telemetry.addData("Area", area);
                 contourRects.add(Imgproc.boundingRect(contour));
             }
         }
@@ -91,12 +91,13 @@ public class PickupPosition extends OpenCvPipeline {
                     contoursOnFrame,
                     Integer.toString(contourRects.size()),
                     new Point(
-                            30,
-                            50),
+                            45,
+                            100),
                     Imgproc.FONT_HERSHEY_PLAIN,
                     3,
-                    new Scalar(128, 0, 128),
-                    6);
+                    new Scalar(38, 255, 0),
+                    6
+            );
 
             telemetry.addData("Pixels to rotate", centerOffset);
         }

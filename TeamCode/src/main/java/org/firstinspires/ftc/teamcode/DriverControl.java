@@ -9,7 +9,7 @@ public class DriverControl extends RobotStruct {
     public void loop() {
         double speed = gamepad1.right_trigger - gamepad1.left_trigger;
         double straight = gamepad1.left_stick_x;
-        double armSpeed = gamepad2.right_stick_y;
+        double armSpeed = gamepad1.left_stick_y;
         double duckDropperSpeed = 0.50 * (gamepad2.right_trigger - gamepad2.left_trigger);
 
         setDriverMotorPower(speed - straight, speed + straight, speed - straight, speed + straight);
@@ -18,20 +18,20 @@ public class DriverControl extends RobotStruct {
 
         // sendAmpReading();
 
-        if(gamepad2.a) {
+        if(gamepad1.a) {
             setClawPos(0.30);
         }
 
-        if(gamepad2.y) {
+        if(gamepad1.y) {
             setClawPos(0.50);
         }
 
         if(gamepad1.right_stick_x > 0 ) {
-            translateRight(8);
+            translateRight(3);
         }
 
         if(gamepad1.right_stick_x < 0) {
-            translateLeft(8);
+            translateLeft(3);
         }
     }
 }

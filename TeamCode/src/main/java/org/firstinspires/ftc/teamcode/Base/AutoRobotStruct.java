@@ -11,6 +11,7 @@ public class AutoRobotStruct extends LinearOpMode {
     DcMotor motorBackRight;
     DcMotor motorBackLeft;
     DcMotorEx motorArm;
+    DcMotorEx motorArmDuo;
     Servo servoClaw;
 
     @Override
@@ -22,6 +23,7 @@ public class AutoRobotStruct extends LinearOpMode {
         motorBackLeft = hardwareMap.get(DcMotor.class, "motor back left");
         motorBackRight = hardwareMap.get(DcMotor.class, "motor back right");
         motorArm = hardwareMap.get(DcMotorEx.class, "motor arm");
+        motorArmDuo = hardwareMap.get(DcMotorEx.class, "motor arm duo");
         servoClaw = hardwareMap.get(Servo.class, "servo claw");
 
         motorBackRight.setDirection(DcMotor.Direction.REVERSE);
@@ -37,6 +39,7 @@ public class AutoRobotStruct extends LinearOpMode {
 
     public void setArmSpeed(double speed) {
         motorArm.setPower(speed);
+        motorArmDuo.setPower(speed);
     }
 
     public void setClawPos(double pos) {
