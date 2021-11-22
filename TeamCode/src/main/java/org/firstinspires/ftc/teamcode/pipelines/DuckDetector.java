@@ -19,21 +19,21 @@ public class DuckDetector extends OpenCvPipeline{
 
     static final Rect LEFT_MAT = new Rect(
             15,
-            100,
+            110,
             50,
             120
     );
 
     static final Rect MID_MAT = new Rect(
             95,
-            100,
+            110,
             50,
             120
     );
 
     static final Rect RIGHT_MAT = new Rect(
             170,
-            100,
+            110,
             50,
             120
     );

@@ -93,19 +93,24 @@ public class AutoBotv2 extends AutoRobotStruct {
                 telemetry.update();
                 setClawPos(0.3);
 
-                // move right
-                translateRight(2);
-                sleep(800);
+                // move forward
+                setDriverMotorPower(0.5,0.5,0.5,0.5);
+                sleep(100);
+                setDriverMotorPower(0.0,0.0,0.0,0.0);
+
+                // turn right
+                setDriverMotorPower(-0.5,0.5,-0.5,0.5);
+                sleep(215);
                 setDriverMotorPower(0.0,0.0,0.0,0.0);
 
                 // move forward
                 setDriverMotorPower(0.5,0.5,0.5,0.5);
-                sleep(500);
+                sleep(600);
                 setDriverMotorPower(0.0,0.0,0.0,0.0);
 
                 // move arm down
                 setArmSpeed(-0.5);
-                sleep(2500);
+                sleep(1500);
 
                 // release cube
                 setClawPos(0.90);
