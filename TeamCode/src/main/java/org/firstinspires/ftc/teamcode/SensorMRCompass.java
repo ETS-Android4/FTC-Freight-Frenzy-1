@@ -27,7 +27,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.firstinspires.ftc.robotcontroller.external.samples;
+package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cCompassSensor;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
@@ -50,7 +50,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
  * @see <a href="http://www.modernroboticsinc.com/compass">MR Compass Sensor</a>
  */
 @TeleOp(name = "Sensor: MR compass")
-@Disabled
+//@Disabled
 public class SensorMRCompass extends LinearOpMode {
 
     ModernRoboticsI2cCompassSensor compass;

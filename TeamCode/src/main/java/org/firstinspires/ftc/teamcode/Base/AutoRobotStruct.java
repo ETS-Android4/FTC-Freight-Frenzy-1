@@ -1,18 +1,24 @@
 package org.firstinspires.ftc.teamcode.Base;
 
+import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+
 public class AutoRobotStruct extends LinearOpMode {
-    DcMotor motorFrontRight;
-    DcMotor motorFrontLeft;
-    DcMotor motorBackRight;
-    DcMotor motorBackLeft;
-    DcMotorEx motorArm;
-    DcMotorEx motorArmDuo;
-    Servo servoClaw;
+    private DcMotor motorFrontRight;
+    private DcMotor motorFrontLeft;
+    private DcMotor motorBackRight;
+    private DcMotor motorBackLeft;
+    private DcMotorEx motorArm;
+    private DcMotorEx motorArmDuo;
+    private Servo servoClaw;
+    private DistanceSensor sensorRange;
+    private DistanceSensor sensorRange1;
 
     @Override
     public void runOpMode() throws InterruptedException { }
@@ -25,9 +31,20 @@ public class AutoRobotStruct extends LinearOpMode {
         motorArm = hardwareMap.get(DcMotorEx.class, "motor arm");
         motorArmDuo = hardwareMap.get(DcMotorEx.class, "motor arm duo");
         servoClaw = hardwareMap.get(Servo.class, "servo claw");
+        sensorRange = hardwareMap.get(DistanceSensor.class, "sensor_range");
+        sensorRange1 = hardwareMap.get(DistanceSensor.class, "sensor_range1");
+
 
         motorBackRight.setDirection(DcMotor.Direction.REVERSE);
         motorFrontRight.setDirection(DcMotor.Direction.REVERSE);
+    }
+
+    public double getDistanceFront() {
+        return sensorRange1.getDistance(DistanceUnit.INCH);
+    }
+
+    public double getDistanceArm() {
+        return sensorRange.getDistance(DistanceUnit.INCH);
     }
 
     public void setDriverMotorPower(double FRightPower, double FLeftPower, double BRightPower, double BLeftPower) {
