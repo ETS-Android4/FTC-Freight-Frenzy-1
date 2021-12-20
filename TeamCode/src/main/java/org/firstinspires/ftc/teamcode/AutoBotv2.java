@@ -93,17 +93,6 @@ public class AutoBotv2 extends AutoRobotStruct {
                 setDriverMotorPower(0.0,0.0,0.0,0.0);
                 sleep(100);
 
-                // distance to lower arm to
-//                double dist = getDistanceArm();
-//                while(dist > 11.0) {
-//                    dist = getDistanceArm();
-//
-//                    // move arm down
-//                    setArmSpeed(-0.3);
-//                }
-//                setArmSpeed(0);
-//                sleep(200);
-
                 // release cube
 //                setClawPos(0.90);
 
@@ -119,10 +108,21 @@ public class AutoBotv2 extends AutoRobotStruct {
                 setDriverMotorPower(0.0,0.0,0.0,0.0);
 
                 //                move back
-                setDriverMotorPower(-0.5,-0.5,-0.5,-0.5);
-                sleep(500);
+//                setDriverMotorPower(-0.5,-0.5,-0.5,-0.5);
+//                sleep(500);
+//                setDriverMotorPower(0.0,0.0,0.0,0.0);
+//                sleep(100);
+
+                // distance to back up
+                double dist = getDistanceBack();
+                while(dist > 7.0) {
+                    dist = getDistanceBack();
+
+                    // move robot back
+                    setDriverMotorPower(-0.25,-0.25,-0.25,-0.25);
+                }
                 setDriverMotorPower(0.0,0.0,0.0,0.0);
-                sleep(100);
+                sleep(200);
 
 
                 // force end of while loop
@@ -163,17 +163,6 @@ public class AutoBotv2 extends AutoRobotStruct {
                 setDriverMotorPower(0.0,0.0,0.0,0.0);
                 sleep(100);
 
-                // distance to lower arm to
-//                double dist = getDistanceArm();
-//                while(dist > 11.0) {
-//                    dist = getDistanceArm();
-//
-//                    // move arm down
-//                    setArmSpeed(-0.3);
-//                }
-//                setArmSpeed(0);
-//                sleep(200);
-
                 // release cube
 //                setClawPos(0.90);
 
@@ -189,10 +178,21 @@ public class AutoBotv2 extends AutoRobotStruct {
                 setDriverMotorPower(0.0,0.0,0.0,0.0);
 
                 //                move back
-                setDriverMotorPower(-0.5,-0.5,-0.5,-0.5);
-                sleep(500);
+//                setDriverMotorPower(-0.5,-0.5,-0.5,-0.5);
+//                sleep(500);
+//                setDriverMotorPower(0.0,0.0,0.0,0.0);
+//                sleep(100);
+
+                // distance to back up
+                double dist = getDistanceBack();
+                while(dist > 7.0) {
+                    dist = getDistanceBack();
+
+                    // move robot back
+                    setDriverMotorPower(-0.25,-0.25,-0.25,-0.25);
+                }
                 setDriverMotorPower(0.0,0.0,0.0,0.0);
-                sleep(100);
+                sleep(200);
 
 
                 // force end of while loop
@@ -215,7 +215,7 @@ public class AutoBotv2 extends AutoRobotStruct {
 
                 // turn right
                 setDriverMotorPower(0.5,-0.5,0.5,-0.5);
-                sleep(290);
+                sleep(270);
                 setDriverMotorPower(0.0,0.0,0.0,0.0);
 
                 // distance to move forward
@@ -233,17 +233,6 @@ public class AutoBotv2 extends AutoRobotStruct {
                 setDriverMotorPower(0.0,0.0,0.0,0.0);
                 sleep(100);
 
-                // distance to lower arm to
-//                double dist = getDistanceArm();
-//                while(dist > 11.0) {
-//                    dist = getDistanceArm();
-//
-//                    // move arm down
-//                    setArmSpeed(-0.3);
-//                }
-//                setArmSpeed(0);
-//                sleep(200);
-
                 // release cube
 //                setClawPos(0.90);
 
@@ -259,10 +248,21 @@ public class AutoBotv2 extends AutoRobotStruct {
                 setDriverMotorPower(0.0,0.0,0.0,0.0);
 
                 //                move back
-                setDriverMotorPower(-0.5,-0.5,-0.5,-0.5);
-                sleep(500);
+//                setDriverMotorPower(-0.5,-0.5,-0.5,-0.5);
+//                sleep(500);
+//                setDriverMotorPower(0.0,0.0,0.0,0.0);
+//                sleep(100);
+
+                // distance to back up
+                double dist = getDistanceBack();
+                while(dist > 7.0) {
+                    dist = getDistanceBack();
+
+                    // move robot back
+                    setDriverMotorPower(-0.25,-0.25,-0.25,-0.25);
+                }
                 setDriverMotorPower(0.0,0.0,0.0,0.0);
-                sleep(100);
+                sleep(200);
 
 
                 // force end of while loop
