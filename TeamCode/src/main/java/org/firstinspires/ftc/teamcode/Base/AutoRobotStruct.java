@@ -14,11 +14,11 @@ public class AutoRobotStruct extends LinearOpMode {
     private DcMotor motorFrontLeft;
     private DcMotor motorBackRight;
     private DcMotor motorBackLeft;
-    private DcMotorEx motorArm;
-    private DcMotorEx motorArmDuo;
+//    private DcMotorEx motorArm;
+//    private DcMotorEx motorArmDuo;
     private Servo servoClaw;
-    private DistanceSensor sensorRange;
-    private DistanceSensor sensorRange1;
+    private DistanceSensor distanceBack;
+    private DistanceSensor distanceFront;
 
     @Override
     public void runOpMode() throws InterruptedException { }
@@ -28,23 +28,23 @@ public class AutoRobotStruct extends LinearOpMode {
         motorFrontLeft = hardwareMap.get(DcMotor.class, "motor front left");
         motorBackLeft = hardwareMap.get(DcMotor.class, "motor back left");
         motorBackRight = hardwareMap.get(DcMotor.class, "motor back right");
-        motorArm = hardwareMap.get(DcMotorEx.class, "motor arm");
-        motorArmDuo = hardwareMap.get(DcMotorEx.class, "motor arm duo");
+//        motorArm = hardwareMap.get(DcMotorEx.class, "motor arm");
+//        motorArmDuo = hardwareMap.get(DcMotorEx.class, "motor arm duo");
         servoClaw = hardwareMap.get(Servo.class, "servo claw");
-        sensorRange = hardwareMap.get(DistanceSensor.class, "sensor_range");
-        sensorRange1 = hardwareMap.get(DistanceSensor.class, "sensor_range1");
+        distanceBack = hardwareMap.get(DistanceSensor.class, "distance back");
+        distanceFront = hardwareMap.get(DistanceSensor.class, "distance front");
 
 
-        motorBackRight.setDirection(DcMotor.Direction.REVERSE);
-        motorFrontRight.setDirection(DcMotor.Direction.REVERSE);
+        motorBackLeft.setDirection(DcMotor.Direction.REVERSE);
+        motorFrontLeft.setDirection(DcMotor.Direction.REVERSE);
     }
 
     public double getDistanceFront() {
-        return sensorRange1.getDistance(DistanceUnit.INCH);
+        return distanceFront.getDistance(DistanceUnit.INCH);
     }
 
-    public double getDistanceArm() {
-        return sensorRange.getDistance(DistanceUnit.INCH);
+    public double getDistanceBack() {
+        return distanceBack.getDistance(DistanceUnit.INCH);
     }
 
     public void setDriverMotorPower(double FRightPower, double FLeftPower, double BRightPower, double BLeftPower) {
@@ -53,27 +53,13 @@ public class AutoRobotStruct extends LinearOpMode {
         motorBackLeft.setPower(BLeftPower);
         motorBackRight.setPower(BRightPower);
     }
-
-    public void setArmSpeed(double speed) {
-        motorArm.setPower(speed);
-        motorArmDuo.setPower(speed);
-    }
+//
+//    public void setArmSpeed(double speed) {
+//        motorArm.setPower(speed);
+//        motorArmDuo.setPower(speed);
+//    }
 
     public void setClawPos(double pos) {
         servoClaw.setPosition(pos);
-    }
-
-    public void translateRight(double m) {
-        motorFrontRight.setPower(-m);
-        motorFrontLeft.setPower(m);
-        motorBackLeft.setPower(-m);
-        motorBackRight.setPower(m);
-    }
-
-    public void translateLeft(double m) {
-        motorFrontRight.setPower(m);
-        motorFrontLeft.setPower(-m);
-        motorBackLeft.setPower(m);
-        motorBackRight.setPower(-m);
     }
 }

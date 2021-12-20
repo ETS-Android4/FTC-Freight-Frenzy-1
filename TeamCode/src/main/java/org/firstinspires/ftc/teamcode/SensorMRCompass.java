@@ -50,7 +50,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
  * @see <a href="http://www.modernroboticsinc.com/compass">MR Compass Sensor</a>
  */
 @TeleOp(name = "Sensor: MR compass")
-//@Disabled
+@Disabled
 public class SensorMRCompass extends LinearOpMode {
 
     ModernRoboticsI2cCompassSensor compass;
