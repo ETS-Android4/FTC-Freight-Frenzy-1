@@ -14,9 +14,11 @@ public class AutoRobotStruct extends LinearOpMode {
     private DcMotor motorFrontLeft;
     private DcMotor motorBackRight;
     private DcMotor motorBackLeft;
-//    private DcMotorEx motorArm;
+    DcMotor motorDuckDropper;
+
+    //    private DcMotorEx motorArm;
 //    private DcMotorEx motorArmDuo;
-    private Servo servoClaw;
+//    private Servo servoClaw;
     private DistanceSensor distanceBack;
     private DistanceSensor distanceFront;
 
@@ -28,9 +30,10 @@ public class AutoRobotStruct extends LinearOpMode {
         motorFrontLeft = hardwareMap.get(DcMotor.class, "motor front left");
         motorBackLeft = hardwareMap.get(DcMotor.class, "motor back left");
         motorBackRight = hardwareMap.get(DcMotor.class, "motor back right");
+        motorDuckDropper = hardwareMap.get(DcMotor.class, "motor duck dropper");
 //        motorArm = hardwareMap.get(DcMotorEx.class, "motor arm");
 //        motorArmDuo = hardwareMap.get(DcMotorEx.class, "motor arm duo");
-        servoClaw = hardwareMap.get(Servo.class, "servo claw");
+//        servoClaw = hardwareMap.get(Servo.class, "servo claw");
         distanceBack = hardwareMap.get(DistanceSensor.class, "distance back");
         distanceFront = hardwareMap.get(DistanceSensor.class, "distance front");
 
@@ -53,13 +56,18 @@ public class AutoRobotStruct extends LinearOpMode {
         motorBackLeft.setPower(BLeftPower);
         motorBackRight.setPower(BRightPower);
     }
+
+    public void setDuckDropperSpeed(double speed){
+        motorDuckDropper.setPower(-speed);
+    }
+
 //
 //    public void setArmSpeed(double speed) {
 //        motorArm.setPower(speed);
 //        motorArmDuo.setPower(speed);
 //    }
 
-    public void setClawPos(double pos) {
-        servoClaw.setPosition(pos);
-    }
+//    public void setClawPos(double pos) {
+//        servoClaw.setPosition(pos);
+//    }
 }

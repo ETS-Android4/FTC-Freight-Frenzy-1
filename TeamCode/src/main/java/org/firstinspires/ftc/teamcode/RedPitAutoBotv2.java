@@ -10,10 +10,10 @@ import org.firstinspires.ftc.teamcode.pipelines.DuckDetector;
  * /_/  |_\____/ /_/  \____/_/ |_/\____/_/  /_/\____/\____//____/   *
  *******************************************************************/
 
-@com.qualcomm.robotcore.eventloop.opmode.Autonomous(name = "AutoBotv2")
-public class AutoBotv2 extends AutoRobotStruct {
+@com.qualcomm.robotcore.eventloop.opmode.Autonomous(name = "RedPitAutoBotv2")
+public class RedPitAutoBotv2 extends AutoRobotStruct {
     InitCV AutoCVCMD;
-    DuckDetector duckVision = new DuckDetector();;
+    DuckDetector duckVision = new DuckDetector();
     String position = "NOT FOUND";
     String direction = "LEFT";
 
@@ -73,8 +73,8 @@ public class AutoBotv2 extends AutoRobotStruct {
                 sleep(100);
                 setDriverMotorPower(0.0,0.0,0.0,0.0);
 
-                // turn right
-                setDriverMotorPower(0.5,-0.5,0.5,-0.5);
+                // turn left
+                setDriverMotorPower(-0.5,0.5,-0.5,0.5);
                 sleep(270);
                 setDriverMotorPower(0.0,0.0,0.0,0.0);
 
@@ -98,31 +98,15 @@ public class AutoBotv2 extends AutoRobotStruct {
 
 //                move back
                 setDriverMotorPower(-0.5,-0.5,-0.5,-0.5);
-                sleep(700);
+                sleep(1300);
                 setDriverMotorPower(0.0,0.0,0.0,0.0);
                 sleep(100);
 
-                // turn right
-                setDriverMotorPower(0.5,-0.5,0.5,-0.5);
-                sleep(310);
+                // turn left
+                setDriverMotorPower(-0.5,0.5,-0.5,0.5);
+                sleep(295);
                 setDriverMotorPower(0.0,0.0,0.0,0.0);
 
-                //                move back
-//                setDriverMotorPower(-0.5,-0.5,-0.5,-0.5);
-//                sleep(500);
-//                setDriverMotorPower(0.0,0.0,0.0,0.0);
-//                sleep(100);
-
-                // distance to back up
-                double dist = getDistanceBack();
-                while(dist > 7.0) {
-                    dist = getDistanceBack();
-
-                    // move robot back
-                    setDriverMotorPower(-0.25,-0.25,-0.25,-0.25);
-                }
-                setDriverMotorPower(0.0,0.0,0.0,0.0);
-                sleep(200);
 
 
                 // force end of while loop
@@ -195,6 +179,7 @@ public class AutoBotv2 extends AutoRobotStruct {
                 sleep(200);
 
 
+
                 // force end of while loop
                 requestOpModeStop();
             }
@@ -263,6 +248,7 @@ public class AutoBotv2 extends AutoRobotStruct {
                 }
                 setDriverMotorPower(0.0,0.0,0.0,0.0);
                 sleep(200);
+
 
 
                 // force end of while loop
