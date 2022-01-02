@@ -42,19 +42,20 @@ public class RobotStruct extends OpMode {
     public void loop() {}
 
     public void initDriver(){
-        float gamepad1LeftY = -gamepad1.left_stick_y;
-        float gamepad1LeftX = gamepad1.left_stick_x;
-        float gamepad1RightX = gamepad1.right_stick_x;
-        float gamepad2RightY = gamepad2.right_stick_y;
-        float gamepad2LeftY = gamepad2.left_stick_y;
-        float FrontRight = -gamepad1LeftY + gamepad1LeftX + gamepad1RightX;
-        float FrontLeft = -gamepad1LeftY - gamepad1LeftX - gamepad1RightX;
-        float BackLeft = -gamepad1LeftY + gamepad1LeftX - gamepad1RightX;
-        float BackRight = -gamepad1LeftY - gamepad1LeftX + gamepad1RightX;
-        motorFrontRight.setPower(FrontRight);
-        motorFrontLeft.setPower(FrontLeft);
-        motorBackLeft.setPower(BackLeft);
-        motorBackRight.setPower(BackRight);
+        double y = -gamepad1.left_stick_y;
+        double x = gamepad1.left_stick_x * 1.1;
+        double rx = gamepad1.right_stick_x;
+
+        double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
+        double frontLeftPower = (y + x + rx) / denominator;
+        double backLeftPower = (y - x + rx) / denominator;
+        double frontRightPower = (y - x - rx) / denominator;
+        double backRightPower = (y + x - rx) / denominator;
+
+        motorFrontLeft.setPower(frontLeftPower);
+        motorBackLeft.setPower(backLeftPower);
+        motorFrontRight.setPower(frontRightPower);
+        motorBackRight.setPower(backRightPower);
     }
 
     public void setDriverMotorPower(double m) {

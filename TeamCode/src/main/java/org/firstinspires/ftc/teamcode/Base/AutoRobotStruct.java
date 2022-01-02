@@ -16,8 +16,8 @@ public class AutoRobotStruct extends LinearOpMode {
     private DcMotor motorBackLeft;
     DcMotor motorDuckDropper;
 
-    //    private DcMotorEx motorArm;
-//    private DcMotorEx motorArmDuo;
+    private DcMotorEx motorArm;
+    private DcMotorEx motorArmDuo;
 //    private Servo servoClaw;
     private DistanceSensor distanceBack;
     private DistanceSensor distanceFront;
@@ -31,8 +31,8 @@ public class AutoRobotStruct extends LinearOpMode {
         motorBackLeft = hardwareMap.get(DcMotor.class, "motor back left");
         motorBackRight = hardwareMap.get(DcMotor.class, "motor back right");
         motorDuckDropper = hardwareMap.get(DcMotor.class, "motor duck dropper");
-//        motorArm = hardwareMap.get(DcMotorEx.class, "motor arm");
-//        motorArmDuo = hardwareMap.get(DcMotorEx.class, "motor arm duo");
+        motorArm = hardwareMap.get(DcMotorEx.class, "motor arm");
+        motorArmDuo = hardwareMap.get(DcMotorEx.class, "motor arm duo");
 //        servoClaw = hardwareMap.get(Servo.class, "servo claw");
         distanceBack = hardwareMap.get(DistanceSensor.class, "distance back");
         distanceFront = hardwareMap.get(DistanceSensor.class, "distance front");
@@ -61,6 +61,29 @@ public class AutoRobotStruct extends LinearOpMode {
         motorDuckDropper.setPower(-speed);
     }
 
+    public void STOP_AND_RESET() {
+        motorArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motorArmDuo.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+    }
+
+    public void SET_TARGET_POWER_RUN(int position, double power) {
+        motorArm.setTargetPosition(position);
+        motorArmDuo.setTargetPosition(position);
+
+        motorArm.setPower(power);
+        motorArmDuo.setPower(power);
+
+        motorArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        motorArmDuo.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        while (motorArm.isBusy() || motorArmDuo.isBusy()){
+            telemetry.addData("MOVING", "Arm");
+            telemetry.update();
+        }
+
+        motorArm.setPower(0);
+        motorArmDuo.setPower(0);
+    }
 //
 //    public void setArmSpeed(double speed) {
 //        motorArm.setPower(speed);

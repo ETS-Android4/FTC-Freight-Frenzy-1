@@ -17,6 +17,13 @@ public class RedDuckAutoBotv2 extends AutoRobotStruct {
     String position = "NOT FOUND";
     String direction = "LEFT";
 
+    final int MOTOR_TICK_COUNT = 1120; // need to adjust
+    final double diameter = 10; // need to adjust
+    final double circumference = 3.15*diameter;
+    final double num_of_inches = 5;
+    double rotations = num_of_inches/circumference;
+    int encoderDriveTarget  = (int)(rotations*MOTOR_TICK_COUNT);
+
     public void detect(){
         if (position.equals("LEFT")) {
             // inverse from the box this correlates to because the phone is upside down
@@ -56,8 +63,10 @@ public class RedDuckAutoBotv2 extends AutoRobotStruct {
         }
 
         initRunner();
+        STOP_AND_RESET();
 
         waitForStart();
+
 //        AutoCVCMD.stopStream();
 
         if (direction.equals("MIDDLE")) {
@@ -75,7 +84,7 @@ public class RedDuckAutoBotv2 extends AutoRobotStruct {
 
                 // turn right
                 setDriverMotorPower(0.5,-0.5,0.5,-0.5);
-                sleep(295);
+                sleep(310);
                 setDriverMotorPower(0.0,0.0,0.0,0.0);
 
                 // distance to move forward
@@ -93,6 +102,10 @@ public class RedDuckAutoBotv2 extends AutoRobotStruct {
                 setDriverMotorPower(0.0,0.0,0.0,0.0);
                 sleep(100);
 
+                // raise arm
+                STOP_AND_RESET();
+                SET_TARGET_POWER_RUN(encoderDriveTarget, 0.5);
+
                 // release cube
 //                setClawPos(0.90);
 
@@ -109,7 +122,7 @@ public class RedDuckAutoBotv2 extends AutoRobotStruct {
 
                 // turn right
                 setDriverMotorPower(0.5,-0.5,0.5,-0.5);
-                sleep(310);
+                sleep(435);
                 setDriverMotorPower(0.0,0.0,0.0,0.0);
 
                 //                move back
@@ -120,7 +133,7 @@ public class RedDuckAutoBotv2 extends AutoRobotStruct {
 
                 // distance to back up
                 dist = getDistanceBack();
-                while(dist > 8.0) {
+                while(dist > 12.0) {
                     dist = getDistanceBack();
 
                     // move robot back
@@ -129,8 +142,17 @@ public class RedDuckAutoBotv2 extends AutoRobotStruct {
                 setDriverMotorPower(0.0,0.0,0.0,0.0);
                 sleep(200);
 
-                setDuckDropperSpeed(0.25);
-                sleep(600);
+                setDuckDropperSpeed(0.05);
+                sleep(1200);
+                setDuckDropperSpeed(0.0);
+                sleep(100);
+
+                // translate left
+                setDriverMotorPower(0.25,-0.25,-0.25,0.25);
+                sleep(300);
+
+                setDriverMotorPower(0.0,0.0,0.0,0.0);
+                sleep(100);
 
                 // force end of while loop
                 requestOpModeStop();
@@ -152,7 +174,7 @@ public class RedDuckAutoBotv2 extends AutoRobotStruct {
 
                 // turn right
                 setDriverMotorPower(0.5,-0.5,0.5,-0.5);
-                sleep(270);
+                sleep(310);
                 setDriverMotorPower(0.0,0.0,0.0,0.0);
 
                 // distance to move forward
@@ -183,9 +205,10 @@ public class RedDuckAutoBotv2 extends AutoRobotStruct {
                 }
                 setDriverMotorPower(0,0,0,0);
 
+
                 // turn right
                 setDriverMotorPower(0.5,-0.5,0.5,-0.5);
-                sleep(310);
+                sleep(435);
                 setDriverMotorPower(0.0,0.0,0.0,0.0);
 
                 //                move back
@@ -196,7 +219,7 @@ public class RedDuckAutoBotv2 extends AutoRobotStruct {
 
                 // distance to back up
                 dist = getDistanceBack();
-                while(dist > 8.0) {
+                while(dist > 12.0) {
                     dist = getDistanceBack();
 
                     // move robot back
@@ -205,8 +228,17 @@ public class RedDuckAutoBotv2 extends AutoRobotStruct {
                 setDriverMotorPower(0.0,0.0,0.0,0.0);
                 sleep(200);
 
-                setDuckDropperSpeed(0.25);
-                sleep(600);
+                setDuckDropperSpeed(0.05);
+                sleep(1200);
+                setDuckDropperSpeed(0.0);
+                sleep(100);
+
+                // translate left
+                setDriverMotorPower(0.25,-0.25,-0.25,0.25);
+                sleep(300);
+
+                setDriverMotorPower(0.0,0.0,0.0,0.0);
+                sleep(100);
 
                 // force end of while loop
                 requestOpModeStop();
@@ -228,7 +260,7 @@ public class RedDuckAutoBotv2 extends AutoRobotStruct {
 
                 // turn right
                 setDriverMotorPower(0.5,-0.5,0.5,-0.5);
-                sleep(270);
+                sleep(310);
                 setDriverMotorPower(0.0,0.0,0.0,0.0);
 
                 // distance to move forward
@@ -259,9 +291,10 @@ public class RedDuckAutoBotv2 extends AutoRobotStruct {
                 }
                 setDriverMotorPower(0,0,0,0);
 
+
                 // turn right
                 setDriverMotorPower(0.5,-0.5,0.5,-0.5);
-                sleep(310);
+                sleep(435);
                 setDriverMotorPower(0.0,0.0,0.0,0.0);
 
                 //                move back
@@ -272,7 +305,7 @@ public class RedDuckAutoBotv2 extends AutoRobotStruct {
 
                 // distance to back up
                 dist = getDistanceBack();
-                while(dist > 8.0) {
+                while(dist > 12.0) {
                     dist = getDistanceBack();
 
                     // move robot back
@@ -281,8 +314,17 @@ public class RedDuckAutoBotv2 extends AutoRobotStruct {
                 setDriverMotorPower(0.0,0.0,0.0,0.0);
                 sleep(200);
 
-                setDuckDropperSpeed(0.25);
-                sleep(600);
+                setDuckDropperSpeed(0.05);
+                sleep(1200);
+                setDuckDropperSpeed(0.0);
+                sleep(100);
+
+                // translate left
+                setDriverMotorPower(0.25,-0.25,-0.25,0.25);
+                sleep(300);
+
+                setDriverMotorPower(0.0,0.0,0.0,0.0);
+                sleep(100);
 
                 // force end of while loop
                 requestOpModeStop();

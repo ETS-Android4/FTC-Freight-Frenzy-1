@@ -82,7 +82,7 @@ public class RedPitAutoBotv2 extends AutoRobotStruct {
                 double distFront = getDistanceFront();
                 telemetry.addData("Dist front ", distFront);
 
-                while (distFront > 11.0) {
+                while (distFront > 8.0) {
 //                    telemetry.addData("Dist front ", distFront);
                     // move forward
                     setDriverMotorPower(0.25,0.25,0.25,0.25);
@@ -93,21 +93,49 @@ public class RedPitAutoBotv2 extends AutoRobotStruct {
                 setDriverMotorPower(0.0,0.0,0.0,0.0);
                 sleep(100);
 
+                // turn right
+                setDriverMotorPower(0.5,-0.5,0.5,-0.5);
+                sleep(270);
+                setDriverMotorPower(0.0,0.0,0.0,0.0);
+
                 // release cube
 //                setClawPos(0.90);
 
-//                move back
-                setDriverMotorPower(-0.5,-0.5,-0.5,-0.5);
-                sleep(1300);
+// distance to back up
+                double dist = getDistanceBack();
+                while(dist > 2.0) {
+                    dist = getDistanceBack();
+
+                    // move robot back
+                    setDriverMotorPower(-0.25,-0.25,-0.25,-0.25);
+                }
                 setDriverMotorPower(0.0,0.0,0.0,0.0);
-                sleep(100);
+                sleep(200);
 
                 // turn left
                 setDriverMotorPower(-0.5,0.5,-0.5,0.5);
-                sleep(295);
+                sleep(800);
                 setDriverMotorPower(0.0,0.0,0.0,0.0);
+                sleep(100);
 
+                // move backwards
+                setDriverMotorPower(-0.5,-0.5,-0.5,-0.5);
+                sleep(100);
+                setDriverMotorPower(0.0,0.0,0.0,0.0);
+                sleep(100);
 
+                // translate left
+                setDriverMotorPower(0.25,-0.25,-0.25,0.25);
+                sleep(300);
+
+                setDriverMotorPower(0.0,0.0,0.0,0.0);
+                sleep(100);
+
+                // move backwards
+                setDriverMotorPower(-0.5,-0.5,-0.5,-0.5);
+                sleep(900);
+                setDriverMotorPower(0.0,0.0,0.0,0.0);
+                sleep(100);
 
                 // force end of while loop
                 requestOpModeStop();
