@@ -9,21 +9,22 @@ public class DriverControl extends RobotStruct {
     public void loop() {
         double intakeSpeed = gamepad1.right_trigger - gamepad1.left_trigger;
 //        double rotate = gamepad1.left_stick_x;
-//        double armSpeed = gamepad2.left_stick_y;
+        double armSpeed = gamepad2.left_stick_y;
         double duckDropperSpeed = gamepad2.right_trigger - gamepad2.left_trigger;
 
 //        setDriverMotorPower(speed - rotate, speed + rotate, speed - rotate, speed + rotate);
         setDuckDropperSpeed(duckDropperSpeed);
         setIntakeSpeed(intakeSpeed);
-//        setArmSpeed(-armSpeed);
+        setArmSpeed(-armSpeed);
         initDriver();
 
         /*
         Servo claw positioned on the robot arm which opens and closes
          */
 
+//        close
         if(gamepad2.a) {
-            setClawPos(0.78, 0.12);
+            setClawPos(0.9, 0.01);
         }
 
 //        open

@@ -17,10 +17,10 @@ public class RedDuckAutoBotv2 extends AutoRobotStruct {
     String position = "NOT FOUND";
     String direction = "LEFT";
 
-    final int MOTOR_TICK_COUNT = 1120; // need to adjust
-    final double diameter = 10; // need to adjust
-    final double circumference = 3.15*diameter;
-    final double num_of_inches = 5;
+    final int MOTOR_TICK_COUNT = 538;
+    final double diameter = 4; // need to adjust
+    final double circumference = 3.14*diameter;
+    final double num_of_inches = 2;
     double rotations = num_of_inches/circumference;
     int encoderDriveTarget  = (int)(rotations*MOTOR_TICK_COUNT);
 

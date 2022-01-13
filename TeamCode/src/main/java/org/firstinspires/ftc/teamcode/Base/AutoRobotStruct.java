@@ -14,11 +14,12 @@ public class AutoRobotStruct extends LinearOpMode {
     private DcMotor motorFrontLeft;
     private DcMotor motorBackRight;
     private DcMotor motorBackLeft;
+    private Servo servoClaw1;
+    private Servo servoClaw2;
     DcMotor motorDuckDropper;
 
     private DcMotorEx motorArm;
     private DcMotorEx motorArmDuo;
-//    private Servo servoClaw;
     private DistanceSensor distanceBack;
     private DistanceSensor distanceFront;
 
@@ -33,7 +34,8 @@ public class AutoRobotStruct extends LinearOpMode {
         motorDuckDropper = hardwareMap.get(DcMotor.class, "motor duck dropper");
         motorArm = hardwareMap.get(DcMotorEx.class, "motor arm");
         motorArmDuo = hardwareMap.get(DcMotorEx.class, "motor arm duo");
-//        servoClaw = hardwareMap.get(Servo.class, "servo claw");
+        servoClaw1 = hardwareMap.get(Servo.class, "servo claw1");
+        servoClaw2 = hardwareMap.get(Servo.class, "servo claw2");
         distanceBack = hardwareMap.get(DistanceSensor.class, "distance back");
         distanceFront = hardwareMap.get(DistanceSensor.class, "distance front");
 
