@@ -10,19 +10,12 @@ import org.firstinspires.ftc.teamcode.pipelines.DuckDetector;
  * /_/  |_\____/ /_/  \____/_/ |_/\____/_/  /_/\____/\____//____/   *
  *******************************************************************/
 
-@com.qualcomm.robotcore.eventloop.opmode.Autonomous(name = "RedDuckAutoBotv2")
+@com.qualcomm.robotcore.eventloop.opmode.Autonomous(name = "DuckAutoRed")
 public class RedDuckAutoBotv2 extends AutoRobotStruct {
     InitCV AutoCVCMD;
-    DuckDetector duckVision = new DuckDetector();;
+    DuckDetector duckVision = new DuckDetector();
     String position = "NOT FOUND";
     String direction = "LEFT";
-
-    final int MOTOR_TICK_COUNT = 538;
-    final double diameter = 4; // need to adjust
-    final double circumference = 3.14*diameter;
-    final double num_of_inches = 2;
-    double rotations = num_of_inches/circumference;
-    int encoderDriveTarget  = (int)(rotations*MOTOR_TICK_COUNT);
 
     public void detect(){
         if (position.equals("LEFT")) {
@@ -69,29 +62,26 @@ public class RedDuckAutoBotv2 extends AutoRobotStruct {
 
 //        AutoCVCMD.stopStream();
 
-        if (direction.equals("MIDDLE")) {
+        if (direction.equals("RIGHT")) {
             while (opModeIsActive()) {
                 telemetry.update();
-//                setClawPos(0.3);
-
-//                setArmSpeed(0);
-//                sleep(100);
+                setClawPos(0.93, 0.07);
 
                 // move forward
                 setDriverMotorPower(0.5,0.5,0.5,0.5);
-                sleep(100);
+                sleep(135);
                 setDriverMotorPower(0.0,0.0,0.0,0.0);
 
                 // turn right
                 setDriverMotorPower(0.5,-0.5,0.5,-0.5);
-                sleep(310);
+                sleep(220);
                 setDriverMotorPower(0.0,0.0,0.0,0.0);
 
                 // distance to move forward
                 double distFront = getDistanceFront();
                 telemetry.addData("Dist front ", distFront);
 
-                while (distFront > 11.0) {
+                while (distFront > 14.0) {
 //                    telemetry.addData("Dist front ", distFront);
                     // move forward
                     setDriverMotorPower(0.25,0.25,0.25,0.25);
@@ -102,16 +92,19 @@ public class RedDuckAutoBotv2 extends AutoRobotStruct {
                 setDriverMotorPower(0.0,0.0,0.0,0.0);
                 sleep(100);
 
-                // raise arm
-                STOP_AND_RESET();
-                SET_TARGET_POWER_RUN(encoderDriveTarget, 0.5);
+                // lower arm
+                SET_TARGET_POWER_RUN_DOWN(-1100, -1.0);
+                sleep(200);
 
                 // release cube
-//                setClawPos(0.90);
+                setClawPos(0.87, 0.13);
+                sleep(100);
+
+                HOLD_POWER_SET_ZERO();
 
                 // distance to back up
                 double dist = getDistanceBack();
-                while(dist > 11.0) {
+                while(dist > 15.0) {
                     dist = getDistanceBack();
 
                     // move robot back
@@ -122,7 +115,7 @@ public class RedDuckAutoBotv2 extends AutoRobotStruct {
 
                 // turn right
                 setDriverMotorPower(0.5,-0.5,0.5,-0.5);
-                sleep(435);
+                sleep(400);
                 setDriverMotorPower(0.0,0.0,0.0,0.0);
 
                 //                move back
@@ -135,53 +128,55 @@ public class RedDuckAutoBotv2 extends AutoRobotStruct {
                 dist = getDistanceBack();
                 while(dist > 12.0) {
                     dist = getDistanceBack();
-
                     // move robot back
                     setDriverMotorPower(-0.25,-0.25,-0.25,-0.25);
+
+                    telemetry.addData("distance", dist);
+
+                    telemetry.update();
                 }
                 setDriverMotorPower(0.0,0.0,0.0,0.0);
                 sleep(200);
 
-                setDuckDropperSpeed(0.05);
-                sleep(1200);
+                setDuckDropperSpeed(0.10);
+                sleep(2000);
                 setDuckDropperSpeed(0.0);
                 sleep(100);
 
-                // translate left
-                setDriverMotorPower(0.25,-0.25,-0.25,0.25);
-                sleep(300);
+                // move forward
+                setDriverMotorPower(1.0,1.0,1.0,1.0);
+                sleep(3000);
 
                 setDriverMotorPower(0.0,0.0,0.0,0.0);
                 sleep(100);
+
+                setDriverMotorPower(-0.5,0.5,-0.5,0.5);
 
                 // force end of while loop
                 requestOpModeStop();
             }
         }
 
-        else if (direction.equals("LEFT")) {
+        else if (direction.equals("MIDDLE")) {
             while (opModeIsActive()) {
                 telemetry.update();
-//                setClawPos(0.3);
-
-//                setArmSpeed(0);
-//                sleep(100);
+                setClawPos(0.93, 0.07);
 
                 // move forward
                 setDriverMotorPower(0.5,0.5,0.5,0.5);
-                sleep(100);
+                sleep(135);
                 setDriverMotorPower(0.0,0.0,0.0,0.0);
 
                 // turn right
                 setDriverMotorPower(0.5,-0.5,0.5,-0.5);
-                sleep(310);
+                sleep(220);
                 setDriverMotorPower(0.0,0.0,0.0,0.0);
 
                 // distance to move forward
                 double distFront = getDistanceFront();
                 telemetry.addData("Dist front ", distFront);
 
-                while (distFront > 15.0) {
+                while (distFront > 18.0) {
 //                    telemetry.addData("Dist front ", distFront);
                     // move forward
                     setDriverMotorPower(0.25,0.25,0.25,0.25);
@@ -192,12 +187,22 @@ public class RedDuckAutoBotv2 extends AutoRobotStruct {
                 setDriverMotorPower(0.0,0.0,0.0,0.0);
                 sleep(100);
 
+                // lower arm
+                SET_TARGET_POWER_RUN_DOWN(-1440, -0.3);
+                sleep(200);
+
+                setDriverMotorPower(0.25,0.25,0.25,0.25);
+                sleep(250);
+
                 // release cube
-//                setClawPos(0.90);
+                setClawPos(0.87, 0.13);
+                sleep(100);
+
+                HOLD_POWER_SET_ZERO();
 
                 // distance to back up
                 double dist = getDistanceBack();
-                while(dist > 11.0) {
+                while(dist > 15.0) {
                     dist = getDistanceBack();
 
                     // move robot back
@@ -208,37 +213,37 @@ public class RedDuckAutoBotv2 extends AutoRobotStruct {
 
                 // turn right
                 setDriverMotorPower(0.5,-0.5,0.5,-0.5);
-                sleep(435);
+                sleep(400);
                 setDriverMotorPower(0.0,0.0,0.0,0.0);
 
-                //                move back
-//                setDriverMotorPower(-0.5,-0.5,-0.5,-0.5);
-//                sleep(500);
-//                setDriverMotorPower(0.0,0.0,0.0,0.0);
-//                sleep(100);
 
                 // distance to back up
                 dist = getDistanceBack();
                 while(dist > 12.0) {
                     dist = getDistanceBack();
-
                     // move robot back
                     setDriverMotorPower(-0.25,-0.25,-0.25,-0.25);
+
+                    telemetry.addData("distance", dist);
+
+                    telemetry.update();
                 }
                 setDriverMotorPower(0.0,0.0,0.0,0.0);
                 sleep(200);
 
-                setDuckDropperSpeed(0.05);
-                sleep(1200);
+                setDuckDropperSpeed(0.25);
+                sleep(2000);
                 setDuckDropperSpeed(0.0);
                 sleep(100);
 
-                // translate left
-                setDriverMotorPower(0.25,-0.25,-0.25,0.25);
-                sleep(300);
+                // move forward
+                setDriverMotorPower(1.0,1.0,1.0,1.0);
+                sleep(3000);
 
                 setDriverMotorPower(0.0,0.0,0.0,0.0);
                 sleep(100);
+
+                setDriverMotorPower(-0.5,0.5,-0.5,0.5);
 
                 // force end of while loop
                 requestOpModeStop();
@@ -248,26 +253,23 @@ public class RedDuckAutoBotv2 extends AutoRobotStruct {
         else {
             while (opModeIsActive()) {
                 telemetry.update();
-//                setClawPos(0.3);
-
-//                setArmSpeed(0);
-//                sleep(100);
+                setClawPos(0.93, 0.07);
 
                 // move forward
                 setDriverMotorPower(0.5,0.5,0.5,0.5);
-                sleep(100);
+                sleep(135);
                 setDriverMotorPower(0.0,0.0,0.0,0.0);
 
                 // turn right
                 setDriverMotorPower(0.5,-0.5,0.5,-0.5);
-                sleep(310);
+                sleep(220);
                 setDriverMotorPower(0.0,0.0,0.0,0.0);
 
                 // distance to move forward
                 double distFront = getDistanceFront();
                 telemetry.addData("Dist front ", distFront);
 
-                while (distFront > 8.0) {
+                while (distFront > 14.0) {
 //                    telemetry.addData("Dist front ", distFront);
                     // move forward
                     setDriverMotorPower(0.25,0.25,0.25,0.25);
@@ -278,12 +280,22 @@ public class RedDuckAutoBotv2 extends AutoRobotStruct {
                 setDriverMotorPower(0.0,0.0,0.0,0.0);
                 sleep(100);
 
+                // lower arm
+                SET_TARGET_POWER_RUN_DOWN(-1600, -0.3);
+                sleep(200);
+
+                setDriverMotorPower(0.25,0.25,0.25,0.25);
+                sleep(250);
+
                 // release cube
-//                setClawPos(0.90);
+                setClawPos(0.87, 0.13);
+                sleep(100);
+
+                HOLD_POWER_SET_ZERO();
 
                 // distance to back up
                 double dist = getDistanceBack();
-                while(dist > 11.0) {
+                while(dist > 15.0) {
                     dist = getDistanceBack();
 
                     // move robot back
@@ -294,37 +306,37 @@ public class RedDuckAutoBotv2 extends AutoRobotStruct {
 
                 // turn right
                 setDriverMotorPower(0.5,-0.5,0.5,-0.5);
-                sleep(435);
+                sleep(400);
                 setDriverMotorPower(0.0,0.0,0.0,0.0);
 
-                //                move back
-//                setDriverMotorPower(-0.5,-0.5,-0.5,-0.5);
-//                sleep(500);
-//                setDriverMotorPower(0.0,0.0,0.0,0.0);
-//                sleep(100);
 
                 // distance to back up
                 dist = getDistanceBack();
                 while(dist > 12.0) {
                     dist = getDistanceBack();
-
                     // move robot back
                     setDriverMotorPower(-0.25,-0.25,-0.25,-0.25);
+
+                    telemetry.addData("distance", dist);
+
+                    telemetry.update();
                 }
                 setDriverMotorPower(0.0,0.0,0.0,0.0);
                 sleep(200);
 
-                setDuckDropperSpeed(0.05);
-                sleep(1200);
+                setDuckDropperSpeed(0.25);
+                sleep(2000);
                 setDuckDropperSpeed(0.0);
                 sleep(100);
 
-                // translate left
-                setDriverMotorPower(0.25,-0.25,-0.25,0.25);
-                sleep(300);
+                // move forward
+                setDriverMotorPower(1.0,1.0,1.0,1.0);
+                sleep(3000);
 
                 setDriverMotorPower(0.0,0.0,0.0,0.0);
                 sleep(100);
+
+                setDriverMotorPower(-0.5,0.5,-0.5,0.5);
 
                 // force end of while loop
                 requestOpModeStop();

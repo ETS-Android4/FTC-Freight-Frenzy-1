@@ -7,29 +7,97 @@ import org.firstinspires.ftc.teamcode.Base.RobotStruct;
 public class DriverControl extends RobotStruct {
     @Override
     public void loop() {
-        double intakeSpeed = gamepad1.right_trigger - gamepad1.left_trigger;
+
 //        double rotate = gamepad1.left_stick_x;
-        double armSpeed = gamepad2.left_stick_y;
+        double armSpeed = 0.75 * gamepad2.left_stick_y;
         double duckDropperSpeed = gamepad2.right_trigger - gamepad2.left_trigger;
 
 //        setDriverMotorPower(speed - rotate, speed + rotate, speed - rotate, speed + rotate);
         setDuckDropperSpeed(duckDropperSpeed);
-        setIntakeSpeed(intakeSpeed);
         setArmSpeed(-armSpeed);
         initDriver();
 
-        /*
-        Servo claw positioned on the robot arm which opens and closes
-         */
+
+        while (gamepad1.dpad_down){
+            setDriverMotorPower(0.25,0.25,0.25, 0.25);
+
+            if (!gamepad1.dpad_down){
+                setDriverPowerZERO();
+            }
+        }
+
+        while (gamepad1.dpad_up){
+            setDriverMotorPower(-0.25,-0.25,-0.25,-0.25);
+
+            if (!gamepad1.dpad_up){
+                setDriverPowerZERO();
+            }
+        }
+
+        while (gamepad1.dpad_right){
+            translateRight(0.25);
+
+            if (!gamepad1.dpad_right){
+                translateRight(0);
+            }
+        }
+
+        while (gamepad1.dpad_left){
+            translateLeft(0.25);
+
+            if (!gamepad1.dpad_left){
+                translateLeft(0);
+            }
+        }
+
+        if (!gamepad2.dpad_up){
+            setIntakeSpeed(0);
+        }
+
+        if (!gamepad2.dpad_down){
+            setIntakeSpeed(0);
+        }
+
+        while (gamepad2.dpad_up){
+            setIntakeSpeed(0.5);
+
+            if (!gamepad2.dpad_up){
+                setIntakeSpeed(0);
+            }
+        }
+
+        while (gamepad2.dpad_down){
+            setIntakeSpeed(-0.5);
+
+            if (!gamepad2.dpad_down){
+                setIntakeSpeed(0);
+            }
+        }
+
+        while (gamepad2.dpad_up && gamepad2.y){
+            setIntakeSpeed(0.5);
+
+            if (!gamepad2.dpad_up){
+                setIntakeSpeed(0);
+            }
+        }
+
+        while (gamepad2.dpad_down && gamepad2.y){
+            setIntakeSpeed(-0.5);
+
+            if (!gamepad2.dpad_down){
+                setIntakeSpeed(0);
+            }
+        }
 
 //        close
-        if(gamepad2.a) {
-            setClawPos(0.9, 0.01);
+        if(gamepad2.a){
+            setClawPos(0.91, 0.09);
         }
 
 //        open
-        if(gamepad2.b) {
-            setClawPos(0.75, 0.15);
+        if(gamepad2.b){
+            setClawPos(0.87, 0.13);
         }
     }
 }

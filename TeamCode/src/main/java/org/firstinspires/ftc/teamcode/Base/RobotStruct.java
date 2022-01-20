@@ -16,6 +16,9 @@ public class RobotStruct extends OpMode {
     DcMotor motorIntake;
     Servo servoClaw1;
     Servo servoClaw2;
+    Servo servoHold;
+    Servo servoPush;
+
 
     @Override
     public void init() {
@@ -26,10 +29,11 @@ public class RobotStruct extends OpMode {
         motorDuckDropper = hardwareMap.get(DcMotor.class, "motor duck dropper");
         motorArm = hardwareMap.get(DcMotorEx.class, "motor arm");
         motorArmDuo = hardwareMap.get(DcMotorEx.class, "motor arm duo");
+        motorIntake = hardwareMap.get(DcMotorEx.class, "motor intake");
         servoClaw1 = hardwareMap.get(Servo.class, "servo claw1");
         servoClaw2 = hardwareMap.get(Servo.class, "servo claw2");
-
-        motorIntake = hardwareMap.get(DcMotorEx.class, "motor intake");
+        servoHold = hardwareMap.get(Servo.class, "servo Hold");
+        servoHold = hardwareMap.get(Servo.class, "servo Push");
 
         telemetry.addData("Status", "Initialized");
         telemetry.update();
@@ -42,9 +46,10 @@ public class RobotStruct extends OpMode {
     public void loop() {}
 
     public void initDriver(){
-        float gamepad1LeftY = -gamepad1.left_stick_y;
+//        removed a neg from line 50 might need to add back
+        float gamepad1LeftY = gamepad1.left_stick_y;
         float gamepad1LeftX = gamepad1.left_stick_x;
-        float gamepad1RightX = gamepad1.right_stick_x;
+        float gamepad1RightX = -gamepad1.right_stick_x;
         float frontRightPower = -gamepad1LeftY + gamepad1LeftX + gamepad1RightX;
         float frontLeftPower = -gamepad1LeftY - gamepad1LeftX - gamepad1RightX;
         float backLeftPower = -gamepad1LeftY + gamepad1LeftX - gamepad1RightX;
@@ -56,27 +61,34 @@ public class RobotStruct extends OpMode {
         motorBackRight.setPower(backRightPower);
     }
 
-//    public void setDriverMotorPower(double m) {
-//        motorFrontRight.setPower(m);
-//        motorFrontLeft.setPower(m);
-//        motorBackLeft.setPower(m);
-//        motorBackRight.setPower(m);
-//    }
-//
-//    public void translateRight(double m) {
-//        motorFrontRight.setPower(-m);
-//        motorFrontLeft.setPower(m);
-//        motorBackLeft.setPower(-m);
-//        motorBackRight.setPower(m);
-//    }
-//
-//    public void translateLeft(double m) {
-//        motorFrontRight.setPower(m);
-//        motorFrontLeft.setPower(-m);
-//        motorBackLeft.setPower(m);
-//        motorBackRight.setPower(-m);
-//    }
-//
+    public void setDriverMotorPower(double FRightPower, double FLeftPower, double BRightPower, double BLeftPower) {
+        motorFrontRight.setPower(FRightPower);
+        motorFrontLeft.setPower(FLeftPower);
+        motorBackLeft.setPower(BLeftPower);
+        motorBackRight.setPower(BRightPower);
+    }
+
+    public void setDriverPowerZERO() {
+        motorFrontRight.setPower(0);
+        motorFrontLeft.setPower(0);
+        motorBackLeft.setPower(0);
+        motorBackRight.setPower(0);
+    }
+
+    public void translateRight(double m) {
+        motorFrontRight.setPower(-m);
+        motorFrontLeft.setPower(m);
+        motorBackLeft.setPower(-m);
+        motorBackRight.setPower(m);
+    }
+
+    public void translateLeft(double m) {
+        motorFrontRight.setPower(m);
+        motorFrontLeft.setPower(-m);
+        motorBackLeft.setPower(m);
+        motorBackRight.setPower(-m);
+    }
+
 //    public void rightDiagUp(double m){
 //        motorFrontRight.setPower(0);
 //        motorFrontLeft.setPower(m);
@@ -106,7 +118,7 @@ public class RobotStruct extends OpMode {
 //    }
 
     public void setDuckDropperSpeed(double speed){
-        motorDuckDropper.setPower(- (.25) * speed);
+        motorDuckDropper.setPower(- (0.25) * speed);
     }
 
     public void setIntakeSpeed(double speed){
