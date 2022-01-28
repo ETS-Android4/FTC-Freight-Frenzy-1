@@ -85,19 +85,28 @@ public class DriverControl extends RobotStruct {
         while (gamepad2.dpad_down && gamepad2.y){
             setIntakeSpeed(-0.5);
 
-            if (!gamepad2.dpad_down){
+            if (!gamepad2.dpad_down) {
                 setIntakeSpeed(0);
             }
         }
 
 //        close
-        if(gamepad2.a){
+        if(gamepad2.a) {
             setClawPos(0.91, 0.09);
         }
 
 //        open
-        if(gamepad2.b){
-            setClawPos(0.87, 0.13);
+        if(gamepad2.b) {
+            setClawPos(0.85, 0.15);
+        }
+
+        if (gamepad2.x) {
+            setHoldPosition(0);
+
+        }
+
+        if (gamepad2.y) {
+            setPushPosition(0.1);
         }
     }
 }

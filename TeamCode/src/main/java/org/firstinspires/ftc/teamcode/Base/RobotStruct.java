@@ -16,9 +16,8 @@ public class RobotStruct extends OpMode {
     DcMotor motorIntake;
     Servo servoClaw1;
     Servo servoClaw2;
-    Servo servoHold;
     Servo servoPush;
-
+    Servo servoHold;
 
     @Override
     public void init() {
@@ -32,8 +31,8 @@ public class RobotStruct extends OpMode {
         motorIntake = hardwareMap.get(DcMotorEx.class, "motor intake");
         servoClaw1 = hardwareMap.get(Servo.class, "servo claw1");
         servoClaw2 = hardwareMap.get(Servo.class, "servo claw2");
+        servoPush = hardwareMap.get(Servo.class, "servo Push");
         servoHold = hardwareMap.get(Servo.class, "servo Hold");
-        servoHold = hardwareMap.get(Servo.class, "servo Push");
 
         telemetry.addData("Status", "Initialized");
         telemetry.update();
@@ -142,4 +141,16 @@ public class RobotStruct extends OpMode {
         );
         telemetry.update();
     }
+
+    public void setHoldPosition(double holdPosition) {
+        servoHold.setPosition(holdPosition);
+    }
+
+    public void setPushPosition(double pushPosition) {
+        servoPush.setPosition(pushPosition);
+    }
+
+//    public void DropGateAndPush(double holdPosition, double pushPosition) {
+//
+//    }
 }

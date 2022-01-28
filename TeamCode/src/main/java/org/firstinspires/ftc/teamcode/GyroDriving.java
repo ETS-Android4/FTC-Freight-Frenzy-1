@@ -2,8 +2,6 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -12,26 +10,30 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
+import org.firstinspires.ftc.teamcode.Base.AutoRobotStruct;
 
 import java.util.Locale;
 
+import static java.lang.Double.parseDouble;
 
-@TeleOp(name = "Gyro Program")
-public class Gyro extends LinearOpMode
-{
+@com.qualcomm.robotcore.eventloop.opmode.Autonomous(name = "GyroDriving")
+public class GyroDriving extends AutoRobotStruct {
+    String heading;
     BNO055IMU imu;
     Orientation angles;
     Acceleration gravity;
 
+    BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
+
     @Override public void runOpMode() {
-        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
+        initRunner();
+
         parameters.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
         parameters.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
-        parameters.calibrationDataFile = "BNO055IMUCalibration.json"; // see the calibration sample opmode
+        parameters.calibrationDataFile = "BNO055IMUCalibration.json";
         parameters.loggingEnabled      = true;
         parameters.loggingTag          = "IMU";
         parameters.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
-
         imu = hardwareMap.get(BNO055IMU.class, "imu");
         imu.initialize(parameters);
 
@@ -40,10 +42,53 @@ public class Gyro extends LinearOpMode
         waitForStart();
 
         imu.startAccelerationIntegration(new Position(), new Velocity(), 1000);
+        Thread  driveThread = new DriveThread();
+        driveThread.start();
 
         while (opModeIsActive()) {
             telemetry.update();
+            heading = getAngle();
+
+            if (parseDouble(heading) > 0.5){
+                heading = getAngle();
+                setDriverMotorPower(0.25,-0.25,0.25,-0.25);
+                heading = getAngle();
+            }
+
+            if (parseDouble(heading) < 0.5) {
+                heading = getAngle();
+                setDriverMotorPower(-0.25,0.25,-0.25,0.25);
+                heading = getAngle();
+            }
+
+            heading = getAngle();
+
+
+//            driveThread.interrupt();
+//            setDriverMotorPower(0,0,0,0);
+//            sleep(100);
+//
+//            requestOpModeStop();
         }
+
+//        turn program
+//        while (opModeIsActive()) {
+//            telemetry.update();
+//            heading = getAngle();
+//
+//            while (parseDouble(heading) > -78) {
+//                heading = getAngle();
+//                telemetry.update();
+////              turn right
+//                setDriverMotorPower(0.25,-0.25,0.25,-0.25);
+//                heading = getAngle();
+//            }
+//
+//            setDriverMotorPower(0,0,0,0);
+//            sleep(100);
+//
+//            requestOpModeStop();
+//        }
     }
 
     void composeTelemetry() {
@@ -75,5 +120,24 @@ public class Gyro extends LinearOpMode
 
     String formatDegrees(double degrees){
         return String.format(Locale.getDefault(), "%.1f", AngleUnit.DEGREES.normalize(degrees));
+    }
+
+    public String getAngle() {
+        return formatAngle(angles.angleUnit, angles.firstAngle);
+    }
+
+
+    private class DriveThread extends Thread {
+        public DriveThread() {
+            System.out.println("Drive thread");
+        }
+
+        @Override
+        public void run() {
+            while (!isInterrupted()) {
+                // translate
+                setDriverMotorPower(0.25,-0.25,-0.25,0.25);
+            }
+        }
     }
 }

@@ -15,6 +15,8 @@ public class AutoRobotStruct extends LinearOpMode {
     private DcMotor motorBackLeft;
     private Servo servoClaw1;
     private Servo servoClaw2;
+    private Servo servoPush;
+    private Servo servoHold;
     private DcMotor motorDuckDropper;
     private DcMotorEx motorIntake;
     private DcMotorEx motorArm;
@@ -38,8 +40,10 @@ public class AutoRobotStruct extends LinearOpMode {
         distanceBack = hardwareMap.get(DistanceSensor.class, "distance back");
         distanceFront = hardwareMap.get(DistanceSensor.class, "distance front");
         motorIntake = hardwareMap.get(DcMotorEx.class, "motor intake");
+        servoPush = hardwareMap.get(Servo.class, "servo Push");
+        servoHold = hardwareMap.get(Servo.class, "servo Hold");
 
-
+        // reverse direction for this drive train
         motorBackLeft.setDirection(DcMotor.Direction.REVERSE);
         motorFrontLeft.setDirection(DcMotor.Direction.REVERSE);
     }
@@ -59,14 +63,57 @@ public class AutoRobotStruct extends LinearOpMode {
         motorBackRight.setPower(BRightPower);
     }
 
-    public void setDuckDropperSpeed(double speed){
+    public void setDriverMotorPower(double FRightPower, double FLeftPower, double BRightPower, double BLeftPower, int s) {
+        motorFrontRight.setPower(FRightPower);
+        motorFrontLeft.setPower(FLeftPower);
+        motorBackLeft.setPower(BLeftPower);
+        motorBackRight.setPower(BRightPower);
+        sleep(s);
+
+        motorFrontRight.setPower(0);
+        motorFrontLeft.setPower(0);
+        motorBackLeft.setPower(0);
+        motorBackRight.setPower(0);
+        sleep(100);
+    }
+
+    public void setDistanceAndMoveForward(double _front_distance){
+        double distFront = getDistanceFront();
+        telemetry.addData("Dist front ", distFront);
+
+        while (distFront > _front_distance) {
+            // telemetry.addData("Dist front ", distFront);
+            // move forward
+            setDriverMotorPower(0.25,0.25,0.25,0.25);
+            distFront = getDistanceFront();
+        }
+
+        setDriverMotorPower(0.0,0.0,0.0,0.0, 10);
+    }
+
+    public void setDistanceAndMoveBackward(double _back_distance){
+        double distBack = getDistanceBack();
+        telemetry.addData("Dist front ", distBack);
+
+        while (distBack > _back_distance) {
+            // telemetry.addData("Dist front ", distFront);
+            // move back
+            setDriverMotorPower(-0.25,-0.25,-0.25,-0.25);
+            distBack = getDistanceFront();
+        }
+
+        setDriverMotorPower(0.0,0.0,0.0,0.0, 10);
+    }
+
+    public void setDuckDropperSpeed(double speed, int s){
         motorDuckDropper.setPower(-speed);
+        sleep(s);
+
+        motorDuckDropper.setPower(0);
+        sleep(10);
     }
 
     public void STOP_AND_RESET() {
-//        motorArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-//        motorArmDuo.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
         motorArm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         motorArmDuo.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
@@ -93,10 +140,9 @@ public class AutoRobotStruct extends LinearOpMode {
         }
     }
 
-    public void HOLD_POWER_SET_ZERO(){
+    public void SET_ARM_POWER_ZERO(){
         motorArmDuo.setPower(0);
         motorArm.setPower(0);
-
     }
 
     public void setClawPos(double pos1, double pos2) {
@@ -106,5 +152,15 @@ public class AutoRobotStruct extends LinearOpMode {
 
     public void moveIntake(double intakeSpeed) {
         motorIntake.setPower(intakeSpeed);
+    }
+
+    public void releaseHoldGate() {
+        servoHold.setPosition(0);
+    }
+
+    public void pushIntake() {
+        servoPush.setPosition(0);
+        servoPush.setPosition(1);
+        servoPush.setPosition(0);
     }
 }
