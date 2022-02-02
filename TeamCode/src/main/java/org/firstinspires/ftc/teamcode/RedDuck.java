@@ -29,14 +29,14 @@ public class RedDuck extends AutoRobotStruct {
     DuckDetector duckVision = new DuckDetector();
     String position = "NOT FOUND";
     String direction = "LEFT";
-    final double oneEightyDeg = 2 * -78;
+    final double oneEightyDeg = 2 * -78; // used in a full rotation of the bot but takes into account speed and power
     double heading;
     BNO055IMU imu;
     Orientation angles;
     Acceleration gravity;
 
     BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
-//    Thread driveThread = new DriveThread();
+    Thread driveThread = new DriveThread();
 //    Thread correctionThread = new CorrectionThread();
 
     public void detect(){
@@ -96,6 +96,7 @@ public class RedDuck extends AutoRobotStruct {
         // AutoCVCMD.stopStream();
 
         if (direction.equals("RIGHT")) {
+            // constant * (target-current position)
             while (opModeIsActive()) {
                 telemetry.update();
                 // get initial orientation
@@ -105,234 +106,287 @@ public class RedDuck extends AutoRobotStruct {
                 // move forward
                 setDriverMotorPower(0.5,0.5,0.5,0.5, 135);
                 // turn right
-                setDriverMotorPower(0.5,-0.5,0.5,-0.5, 220);
+                turnRight(-20);
                 // distance to move forward
-                setDistanceAndMoveForward(14.0);
+                setDistanceAndMoveForward(10);
                 // lower arm
-                SET_TARGET_POWER_RUN_DOWN(-1100, -1.0);
+                SET_TARGET_POWER_RUN_DOWN(-1200, -1.0);
                 sleep(200);
                 // release cube
                 setClawPos(0.87, 0.13);
                 sleep(100);
+                // move arm back up
+                SET_TARGET_POWER_RUN_DOWN(700, -1.0);
+                sleep(200);
                 SET_ARM_POWER_ZERO();
-                // center self to approx. 0
+                // adjust bot so heading is approx. zero
                 double currentPosition = getAngle();
                 while (currentPosition < -1.0 || currentPosition > 1.0) {
                     // self centering
                     telemetry.addData("heading", currentPosition);
                     telemetry.update();
-                    if (currentPosition > 0.5){
+                    if (currentPosition > 1.0) {
                         telemetry.addData("heading", currentPosition);
                         telemetry.update();
                         setDriverMotorPower(0.20,-0.20,0.20,-0.20);
                         currentPosition = getAngle();
                     }
 
-                    if (currentPosition < -0.5) {
+                    if (currentPosition < -1.0) {
                         telemetry.addData("heading", currentPosition);
                         telemetry.update();
                         setDriverMotorPower(-0.20,0.20,-0.20,0.20);
                         currentPosition = getAngle();
                     }
                 }
-                // adjust bot so heading is approx. zero
-//                positionHeadingAtZero(); // TODO SANITY CHECK: BOT SHOULD ROTATE LEFT
                 // back up
-                setDistanceAndMoveBackward(15.0);
+                setDistanceAndMoveBackward(6.5);
+                sleep(10);
                 // turn right
-                turnRight(-78); // -78 deg is a 90 deg turn when we factor in the motor power
+                turnRight(-78);
                 // move back to hit duck dropper
-                setDistanceAndMoveBackward(12);
+                setDistanceAndMoveBackward(10);
                 // spin motor
-                // setDuckDropperSpeed(-0.20, 2000);
+                setDuckDropperSpeed(0.75, 2000);
+                sleep(10);
                 // move forward
-                setDriverMotorPower(1.0,1.0,1.0,1.0, 500);
-                // complete rotation of the bot so  the intake faces the pit
-                turnRight(oneEightyDeg);
-                // TODO: ADD TRANSLATE TOWARDS WALL ON NEXT LINE-> CHECK DIRECTION TO TURN
+                setDriverMotorPower(0.5,0.5,0.5,0.5, 500);
+                // adjust bot so heading is approx. zero
+                currentPosition = getAngle();
+                while (currentPosition < -1.0 || currentPosition > 1.0) {
+                    // self centering
+                    telemetry.addData("heading", currentPosition);
+                    telemetry.update();
+                    if (currentPosition > 1.0) {
+                        telemetry.addData("heading", currentPosition);
+                        telemetry.update();
+                        setDriverMotorPower(0.20,-0.20,0.20,-0.20);
+                        currentPosition = getAngle();
+                    }
+
+                    if (currentPosition < -1.0) {
+                        telemetry.addData("heading", currentPosition);
+                        telemetry.update();
+                        setDriverMotorPower(-0.20,0.20,-0.20,0.20);
+                        currentPosition = getAngle();
+                    }
+                }
+                sleep(10);
+                // rotation of the bot so  the intake faces the pit
+                turnLeft(65);
                 // back up to pit
-                setDriverMotorPower(-1.0,-1.0,1.0,-1.0, 2500);
+                setDriverMotorPower(-0.5,-0.5,-0.5,-0.5, 2750);
                 releaseHoldGate();
+                // push down intake
                 pushIntake();
+                resetPushIntake();
+                pushIntake();
+                // translate and correct motion
+                driveThread.start();
+                setDriverMotorPower(-0.25,0.25,0.25,-0.25);
+                sleep(2000);
+                driveThread.interrupt();
+//                correctionThread.interrupt();
+                setDriverMotorPower(-0.5,-0.5,-0.5,-0.5, 2500);
                 // force end of while loop
                 requestOpModeStop();
             }
         }
 
         else if (direction.equals("MIDDLE")) {
+            // constant * (target-current position)
             while (opModeIsActive()) {
                 telemetry.update();
+                // get initial orientation
+                heading = getAngle();
+                // close claw to grab cube
                 setClawPos(0.93, 0.07);
-
                 // move forward
-                setDriverMotorPower(0.5,0.5,0.5,0.5);
-                sleep(135);
-                setDriverMotorPower(0.0,0.0,0.0,0.0);
-
+                setDriverMotorPower(0.5,0.5,0.5,0.5, 135);
                 // turn right
-                setDriverMotorPower(0.5,-0.5,0.5,-0.5);
-                sleep(220);
-                setDriverMotorPower(0.0,0.0,0.0,0.0);
-
-                // distance to move forward
-                double distFront = getDistanceFront();
-                telemetry.addData("Dist front ", distFront);
-
-                while (distFront > 18.0) {
-//                    telemetry.addData("Dist front ", distFront);
-                    // move forward
-                    setDriverMotorPower(0.25,0.25,0.25,0.25);
-                    distFront = getDistanceFront();
-                }
-
-                // stop motors
-                setDriverMotorPower(0.0,0.0,0.0,0.0);
-                sleep(100);
-
+                turnRight(-20);
                 // lower arm
-                SET_TARGET_POWER_RUN_DOWN(-1440, -0.3);
+                SET_TARGET_POWER_RUN_DOWN(-1300, -1.0);
                 sleep(200);
-
-                setDriverMotorPower(0.25,0.25,0.25,0.25);
-                sleep(250);
-
+                // distance to move forward
+                setDistanceAndMoveForward(10);
                 // release cube
                 setClawPos(0.87, 0.13);
                 sleep(100);
-
-                SET_ARM_POWER_ZERO();
-
-                // distance to back up
-                double dist = getDistanceBack();
-                while(dist > 15.0) {
-                    dist = getDistanceBack();
-
-                    // move robot back
-                    setDriverMotorPower(-0.25,-0.25,-0.25,-0.25);
-                }
-                setDriverMotorPower(0,0,0,0);
-
-
-                // turn right
-                setDriverMotorPower(0.5,-0.5,0.5,-0.5);
-                sleep(400);
-                setDriverMotorPower(0.0,0.0,0.0,0.0);
-
-
-                // distance to back up
-                dist = getDistanceBack();
-                while(dist > 12.0) {
-                    dist = getDistanceBack();
-                    // move robot back
-                    setDriverMotorPower(-0.25,-0.25,-0.25,-0.25);
-
-                    telemetry.addData("distance", dist);
-
-                    telemetry.update();
-                }
-                setDriverMotorPower(0.0,0.0,0.0,0.0);
+                setDriverMotorPower(-0.25, -0.25, -0.25, -0.25, 300);
+                // move arm back up
+                SET_TARGET_POWER_RUN_DOWN(700, -1.0);
                 sleep(200);
+                SET_ARM_POWER_ZERO();
+                // adjust bot so heading is approx. zero
+                double currentPosition = getAngle();
+                while (currentPosition < -1.0 || currentPosition > 1.0) {
+                    // self centering
+                    telemetry.addData("heading", currentPosition);
+                    telemetry.update();
+                    if (currentPosition > 1.0) {
+                        telemetry.addData("heading", currentPosition);
+                        telemetry.update();
+                        setDriverMotorPower(0.20,-0.20,0.20,-0.20);
+                        currentPosition = getAngle();
+                    }
 
-                setDuckDropperSpeed(0.25, 2000);
-
+                    if (currentPosition < -1.0) {
+                        telemetry.addData("heading", currentPosition);
+                        telemetry.update();
+                        setDriverMotorPower(-0.20,0.20,-0.20,0.20);
+                        currentPosition = getAngle();
+                    }
+                }
+                // back up
+                setDistanceAndMoveBackward(6.5);
+                sleep(10);
+                // turn right
+                turnRight(-78);
+                // move back to hit duck dropper
+                setDistanceAndMoveBackward(10);
+                // spin motor
+                setDuckDropperSpeed(0.75, 2000);
+                sleep(10);
                 // move forward
-                setDriverMotorPower(1.0,1.0,1.0,1.0);
-                sleep(3000);
+                setDriverMotorPower(0.5,0.5,0.5,0.5, 500);
+                // adjust bot so heading is approx. zero
+                currentPosition = getAngle();
+                while (currentPosition < -1.0 || currentPosition > 1.0) {
+                    // self centering
+                    telemetry.addData("heading", currentPosition);
+                    telemetry.update();
+                    if (currentPosition > 1.0) {
+                        telemetry.addData("heading", currentPosition);
+                        telemetry.update();
+                        setDriverMotorPower(0.20,-0.20,0.20,-0.20);
+                        currentPosition = getAngle();
+                    }
 
-                setDriverMotorPower(0.0,0.0,0.0,0.0);
-                sleep(100);
-
-                setDriverMotorPower(-0.5,0.5,-0.5,0.5);
-
+                    if (currentPosition < -1.0) {
+                        telemetry.addData("heading", currentPosition);
+                        telemetry.update();
+                        setDriverMotorPower(-0.20,0.20,-0.20,0.20);
+                        currentPosition = getAngle();
+                    }
+                }
+                sleep(10);
+                // rotation of the bot so  the intake faces the pit
+                turnLeft(65);
+                // back up to pit
+                setDriverMotorPower(-0.5,-0.5,-0.5,-0.5, 2750);
+                releaseHoldGate();
+                // push down intake
+                pushIntake();
+                resetPushIntake();
+                pushIntake();
+                // translate and correct motion
+                driveThread.start();
+                setDriverMotorPower(-0.25,0.25,0.25,-0.25);
+                sleep(2000);
+                driveThread.interrupt();
+//                correctionThread.interrupt();
+                setDriverMotorPower(-0.5,-0.5,-0.5,-0.5, 2500);
                 // force end of while loop
                 requestOpModeStop();
             }
         }
 
         else {
+            // constant * (target-current position)
             while (opModeIsActive()) {
                 telemetry.update();
+                // get initial orientation
+                heading = getAngle();
+                // close claw to grab cube
                 setClawPos(0.93, 0.07);
-
                 // move forward
-                setDriverMotorPower(0.5,0.5,0.5,0.5);
-                sleep(135);
-                setDriverMotorPower(0.0,0.0,0.0,0.0);
-
+                setDriverMotorPower(0.5, 0.5, 0.5, 0.5, 135);
                 // turn right
-                setDriverMotorPower(0.5,-0.5,0.5,-0.5);
-                sleep(220);
-                setDriverMotorPower(0.0,0.0,0.0,0.0);
-
-                // distance to move forward
-                double distFront = getDistanceFront();
-                telemetry.addData("Dist front ", distFront);
-
-                while (distFront > 14.0) {
-//                    telemetry.addData("Dist front ", distFront);
-                    // move forward
-                    setDriverMotorPower(0.25,0.25,0.25,0.25);
-                    distFront = getDistanceFront();
-                }
-
-                // stop motors
-                setDriverMotorPower(0.0,0.0,0.0,0.0);
-                sleep(100);
-
+                turnRight(-20);
                 // lower arm
-                SET_TARGET_POWER_RUN_DOWN(-1600, -0.3);
+                SET_TARGET_POWER_RUN_DOWN(-1400, -1.0);
                 sleep(200);
-
-                setDriverMotorPower(0.25,0.25,0.25,0.25);
-                sleep(250);
-
+                // distance to move forward
+                setDistanceAndMoveForward(10);
                 // release cube
                 setClawPos(0.87, 0.13);
                 sleep(100);
-
-                SET_ARM_POWER_ZERO();
-
-                // distance to back up
-                double dist = getDistanceBack();
-                while(dist > 15.0) {
-                    dist = getDistanceBack();
-
-                    // move robot back
-                    setDriverMotorPower(-0.25,-0.25,-0.25,-0.25);
-                }
-                setDriverMotorPower(0,0,0,0);
-
-                // turn right
-                setDriverMotorPower(0.5,-0.5,0.5,-0.5);
-                sleep(400);
-                setDriverMotorPower(0.0,0.0,0.0,0.0);
-
-
-                // distance to back up
-                dist = getDistanceBack();
-                while(dist > 12.0) {
-                    dist = getDistanceBack();
-                    // move robot back
-                    setDriverMotorPower(-0.25,-0.25,-0.25,-0.25);
-
-                    telemetry.addData("distance", dist);
-
-                    telemetry.update();
-                }
-                setDriverMotorPower(0.0,0.0,0.0,0.0);
+                setDriverMotorPower(-0.25, -0.25, -0.25, -0.25, 300);
+                // move arm back up
+                SET_TARGET_POWER_RUN_DOWN(700, -1.0);
                 sleep(200);
+                SET_ARM_POWER_ZERO();
+                // adjust bot so heading is approx. zero
+                double currentPosition = getAngle();
+                while (currentPosition < -1.0 || currentPosition > 1.0) {
+                    // self centering
+                    telemetry.addData("heading", currentPosition);
+                    telemetry.update();
+                    if (currentPosition > 1.0) {
+                        telemetry.addData("heading", currentPosition);
+                        telemetry.update();
+                        setDriverMotorPower(0.20, -0.20, 0.20, -0.20);
+                        currentPosition = getAngle();
+                    }
 
-                setDuckDropperSpeed(0.25, 2000);
-
+                    if (currentPosition < -1.0) {
+                        telemetry.addData("heading", currentPosition);
+                        telemetry.update();
+                        setDriverMotorPower(-0.20, 0.20, -0.20, 0.20);
+                        currentPosition = getAngle();
+                    }
+                }
+                // back up
+                setDistanceAndMoveBackward(6.5);
+                sleep(10);
+                // turn right
+                turnRight(-78);
+                // move back to hit duck dropper
+                setDistanceAndMoveBackward(10);
+                // spin motor
+                setDuckDropperSpeed(0.75, 2000);
+                sleep(10);
                 // move forward
-                setDriverMotorPower(1.0,1.0,1.0,1.0);
-                sleep(3000);
+                setDriverMotorPower(0.5, 0.5, 0.5, 0.5, 500);
+                // adjust bot so heading is approx. zero
+                currentPosition = getAngle();
+                while (currentPosition < -1.0 || currentPosition > 1.0) {
+                    // self centering
+                    telemetry.addData("heading", currentPosition);
+                    telemetry.update();
+                    if (currentPosition > 1.0) {
+                        telemetry.addData("heading", currentPosition);
+                        telemetry.update();
+                        setDriverMotorPower(0.20, -0.20, 0.20, -0.20);
+                        currentPosition = getAngle();
+                    }
 
-                setDriverMotorPower(0.0,0.0,0.0,0.0);
-                sleep(100);
-
-                setDriverMotorPower(-0.5,0.5,-0.5,0.5);
-
+                    if (currentPosition < -1.0) {
+                        telemetry.addData("heading", currentPosition);
+                        telemetry.update();
+                        setDriverMotorPower(-0.20, 0.20, -0.20, 0.20);
+                        currentPosition = getAngle();
+                    }
+                }
+                sleep(10);
+                // rotation of the bot so  the intake faces the pit
+                turnLeft(65);
+                // TODO: ADD TRANSLATE TOWARDS WALL ON NEXT LINE-> CHECK DIRECTION TO TURN
+                // back up to pit
+                setDriverMotorPower(-0.5, -0.5, -0.5, -0.5, 2750);
+                releaseHoldGate();
+                // push down intake
+                pushIntake();
+                resetPushIntake();
+                pushIntake();
+                // translate and correct motion
+                driveThread.start();
+                setDriverMotorPower(-0.25, 0.25, 0.25, -0.25);
+                sleep(2000);
+                driveThread.interrupt();
+//                correctionThread.interrupt();
+                setDriverMotorPower(-0.5, -0.5, -0.5, -0.5, 2500);
                 // force end of while loop
                 requestOpModeStop();
             }
@@ -394,7 +448,7 @@ public class RedDuck extends AutoRobotStruct {
         double currentPostition = getAngle();
         double intendedPosition = currentPostition + degreesToTurn;
 
-        while (currentPostition < intendedPosition) {
+        while (currentPostition > intendedPosition) {
             telemetry.update();
             setDriverMotorPower(0.25,-0.25,0.25,-0.25);
             currentPostition = getAngle();
@@ -403,79 +457,59 @@ public class RedDuck extends AutoRobotStruct {
         setDriverMotorPower(0, 0, 0, 0, 100);
     }
 
-//    private class DriveThread extends Thread {
-//        public DriveThread() {
-//            telemetry.addData("Starting DriveThread thread: ", "Success");
-//            telemetry.update();
-//        }
-//
-//        @Override
-//        public void run() {
-//
-//            try {
-//                while (!isInterrupted()) {
-//                    // translate
-//                    setDriverMotorPower(0.25,-0.25,-0.25,0.25);
-//
-//                    if(isInterrupted()){
-//                        correctionThread.interrupt();
-//                        setDriverMotorPower(0,0,0,0);
-//
-//                        throw new InterruptedException
-//                                ("Inner Exception: Shutting down driveThread and correctionThread!");
-//                    }
-//                }
-//
-//                throw new InterruptedException("Outer Exception: Shutting down driveThread thread!");
-//            } catch (InterruptedException consumed) {
-//                correctionThread.interrupt();
-//            }
-//        }
-//    }
-//
-//    private class CorrectionThread extends Thread {
-//        public CorrectionThread() {
-//            telemetry.addData("Starting DiverCorrection thread: ", "Success");
-//            telemetry.update();
-//        }
-//
-//        @Override
-//        public void run() {
-//            double initialPosition = getAngle();
-//            double newPosition = getAngle();
-//
-//            while (!isInterrupted()) {
-//                // translate
-//                // adjust any inaccuracies as we translate
-//                if (newPosition > initialPosition){
-//                    setDriverMotorPower(0.25,-0.25,0.25,-0.25);
-//                    newPosition = getAngle();
-//                }
-//
-//                if (newPosition < initialPosition) {
-//                    setDriverMotorPower(-0.25,0.25,-0.25,0.25);
-//                    newPosition = getAngle();
-//                }
-//            }
-//        }
-//    }
+    public void turnLeft(double degreesToTurn) {
+        double currentPosition = getAngle();
+        double intendedPosition = currentPosition + degreesToTurn;
 
-//    private void translateLeft(int s) {
-//        // start translating
-//        driveThread.start();
-//        sleep(s);
-//        try {
-//            driveThread.interrupt();
-//            telemetry.addData("driveThread state:", "TERMINATED");
-//        } catch (Exception e) {
-//            telemetry.addData("driveThread state:", "TERMINATED");
-//        }
-//
-//        try {
-//            correctionThread.interrupt();
-//            telemetry.addData("correctionThread state:", "TERMINATED");
-//        } catch (Exception e) {
-//            telemetry.addData("correctionThread state:", "TERMINATED");
-//        }
-//    }
+        while (currentPosition < intendedPosition) {
+            telemetry.update();
+            setDriverMotorPower(-0.25,0.25,-0.25,0.25);
+            currentPosition = getAngle();
+        }
+
+        setDriverMotorPower(0, 0, 0, 0, 100);
+    }
+
+    private class DriveThread extends Thread {
+        public DriveThread() {
+            telemetry.addData("Starting DriveThread thread: ", "Success");
+            telemetry.update();
+        }
+
+        @Override
+        public void run() {
+            double initialHeading = getAngle();
+            double currentHeading = getAngle();
+
+            try {
+                while (!isInterrupted()) {
+                    telemetry.update();
+                    currentHeading = getAngle();
+
+                    if (currentHeading > initialHeading){
+//                        setDriverMotorPower(0.25,-0.25,0.25,-0.25);
+                        setDriverMotorPower(-0.35,0.25,0.25,-0.35);
+                        currentHeading = getAngle();
+                    }
+
+                    if (currentHeading < initialHeading) {
+                        setDriverMotorPower(-0.25,0.35,0.35,-0.25);
+                        currentHeading = getAngle();
+                    }
+
+                    telemetry.addData("current heading", currentHeading);
+                    telemetry.update();
+
+                    if(isInterrupted()) {
+                        setDriverMotorPower(0,0,0,0);
+
+                        throw new InterruptedException
+                                ("Inner Exception: Shutting down driveThread and correctionThread!");
+                    }
+                }
+
+                throw new InterruptedException("Outer Exception: Shutting down driveThread thread!");
+            } catch (InterruptedException consumed) {}
+        }
+    }
 }

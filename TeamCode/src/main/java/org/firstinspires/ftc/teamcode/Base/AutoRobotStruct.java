@@ -91,15 +91,15 @@ public class AutoRobotStruct extends LinearOpMode {
         setDriverMotorPower(0.0,0.0,0.0,0.0, 10);
     }
 
-    public void setDistanceAndMoveBackward(double _back_distance){
+    public void setDistanceAndMoveBackward(double back_distance){
         double distBack = getDistanceBack();
         telemetry.addData("Dist front ", distBack);
 
-        while (distBack > _back_distance) {
+        while (distBack > back_distance) {
             // telemetry.addData("Dist front ", distFront);
             // move back
             setDriverMotorPower(-0.25,-0.25,-0.25,-0.25);
-            distBack = getDistanceFront();
+            distBack = getDistanceBack();
         }
 
         setDriverMotorPower(0.0,0.0,0.0,0.0, 10);
@@ -140,6 +140,28 @@ public class AutoRobotStruct extends LinearOpMode {
         }
     }
 
+//    public void SET_TARGET_POWER_RUN_UP(int position, double power) {
+//        motorArmDuo.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//        motorArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//
+//        motorArmDuo.setTargetPosition(position);
+//        motorArm.setTargetPosition(-position);
+//
+//        motorArmDuo.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//        motorArmDuo.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//
+//        motorArm.setPower(-power);
+//        motorArmDuo.setPower(power);
+//
+//        while (motorArmDuo.isBusy()) {
+//            telemetry.addData("left en", motorArm.getCurrentPosition());
+//            telemetry.addData("right en", motorArmDuo.getCurrentPosition());
+//            telemetry.update();
+//
+//            idle();
+//        }
+//    }
+
     public void SET_ARM_POWER_ZERO(){
         motorArmDuo.setPower(0);
         motorArm.setPower(0);
@@ -159,8 +181,10 @@ public class AutoRobotStruct extends LinearOpMode {
     }
 
     public void pushIntake() {
-        servoPush.setPosition(0);
         servoPush.setPosition(1);
+    }
+
+    public void resetPushIntake() {
         servoPush.setPosition(0);
     }
 }
