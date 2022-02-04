@@ -1,4 +1,6 @@
 package org.firstinspires.ftc.teamcode;
+import android.graphics.Color;
+
 import org.firstinspires.ftc.teamcode.Base.AutoRobotStruct;
 import org.firstinspires.ftc.teamcode.pipelines.DuckDetector;
 
@@ -67,6 +69,7 @@ public class RedDuck extends AutoRobotStruct {
     }
 
     @Override public void runOpMode() {
+        // open cv initialization
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         AutoCVCMD = new InitCV();
         AutoCVCMD.init(duckVision, cameraMonitorViewId);
@@ -75,6 +78,35 @@ public class RedDuck extends AutoRobotStruct {
             position = duckVision.getLoc();
             detect();
         }
+
+        // initialize values for color sensors (located on arm -> yellow, and bottom -> white)
+        final boolean LedOn = true;
+        float hsvValuesWhite[] = {0F,0F,0F};
+        float hsvValues[] = {0F,0F,0F};
+        final float valuesWhite[] = hsvValuesWhite;
+        final float values[] = hsvValues;
+
+        colorSensor.enableLed(LedOn);
+        whiteLine.enableLed(LedOn);
+
+        Color.RGBToHSV(colorSensor.red() * 8, colorSensor.green() * 8, colorSensor.blue() * 8, hsvValues);
+        Color.RGBToHSV(whiteLine.red() * 8, whiteLine.green() * 8, whiteLine.blue() * 8, hsvValuesWhite);
+
+        // on arm
+        telemetry.addData("LED", LedOn ? "On" : "Off");
+        telemetry.addData("Clear", colorSensor.alpha());
+        telemetry.addData("Red  ", colorSensor.red());
+        telemetry.addData("Green", colorSensor.green());
+        telemetry.addData("Blue ", colorSensor.blue());
+        telemetry.addData("Hue", hsvValues[0]);
+        // on bottom
+        telemetry.addData("LED", LedOn ? "On" : "Off");
+        telemetry.addData("Clear", whiteLine.alpha());
+        telemetry.addData("Red  ", whiteLine.red());
+        telemetry.addData("Green", whiteLine.green());
+        telemetry.addData("Blue ", whiteLine.blue());
+        telemetry.addData("Hue", hsvValues[0]);
+        telemetry.update();
 
         // init robot hardware map and internal expansion hub gyro
         initRunner();
@@ -101,6 +133,8 @@ public class RedDuck extends AutoRobotStruct {
                 telemetry.update();
                 // get initial orientation
                 heading = getAngle();
+//                TODO: revise turnleft ot match turnright
+//                turnRight(90);
                 // close claw to grab cube
                 setClawPos(0.93, 0.07);
                 // move forward
@@ -108,15 +142,16 @@ public class RedDuck extends AutoRobotStruct {
                 // turn right
                 turnRight(-20);
                 // distance to move forward
-                setDistanceAndMoveForward(10);
+                setDistanceAndMoveForwardFromBackSensor(18);
                 // lower arm
-                SET_TARGET_POWER_RUN_DOWN(-1200, -1.0);
+                SET_TARGET_POWER_RUN(-1250, -0.25);
                 sleep(200);
+                setDistanceAndMoveForwardFromBackSensor(24.5);
                 // release cube
                 setClawPos(0.87, 0.13);
                 sleep(100);
                 // move arm back up
-                SET_TARGET_POWER_RUN_DOWN(700, -1.0);
+                SET_TARGET_POWER_RUN(700, -1.0);
                 sleep(200);
                 SET_ARM_POWER_ZERO();
                 // adjust bot so heading is approx. zero
@@ -186,8 +221,44 @@ public class RedDuck extends AutoRobotStruct {
                 setDriverMotorPower(-0.25,0.25,0.25,-0.25);
                 sleep(2000);
                 driveThread.interrupt();
-//                correctionThread.interrupt();
-                setDriverMotorPower(-0.5,-0.5,-0.5,-0.5, 2500);
+
+                // check for white line on ground
+                while (hsvValuesWhite[0] > 110) {
+                    telemetry.update();
+                    setDriverMotorPower(-0.3,-0.3,-0.3,-0.3);
+                    telemetry.update();
+                    Color.RGBToHSV(whiteLine.red() * 8, whiteLine.green() * 8, whiteLine.blue() * 8, hsvValuesWhite);
+                    telemetry.update();
+
+                    // white line detected! therefore we exit with break
+                    if (hsvValuesWhite[0] < 110) {
+                        telemetry.update();
+                        setDriverMotorPower(0,0,0,0, 200);
+                        break;
+                    }
+                }
+
+                // close claw while bringing arm down all the way
+                setClawPos(0.98, 0.02);
+                sleep(10);
+                SET_TARGET_POWER_RUN(350, -0.25);
+                sleep(100);
+                // open claw before starting intake for new blocks
+                setClawPos(0.86, 0.14);
+                sleep(10);
+                // back up further towards blocks
+                setDriverMotorPower(-0.3,-0.3,-0.3,-0.3, 1900);
+                telemetry.update();
+                // start intake
+                startIntakeForSecondPickup(hsvValues, 3000);
+                // should only fire if we did not get a block the first time
+                if (hsvValues[0] > 30 && colorSensor.red() < 60) {
+                    // hopefully this will position us so we can pickup a block
+                    hopeForTheBest();
+                    telemetry.update();
+                    startIntakeForSecondPickup(hsvValues, 3000);
+                }
+
                 // force end of while loop
                 requestOpModeStop();
             }
@@ -205,17 +276,19 @@ public class RedDuck extends AutoRobotStruct {
                 setDriverMotorPower(0.5,0.5,0.5,0.5, 135);
                 // turn right
                 turnRight(-20);
+                sleep(10);
+                setDistanceAndMoveForwardFromBackSensor(18);
                 // lower arm
-                SET_TARGET_POWER_RUN_DOWN(-1300, -1.0);
+                SET_TARGET_POWER_RUN(-1500, -0.25);
                 sleep(200);
                 // distance to move forward
-                setDistanceAndMoveForward(10);
+                setDistanceAndMoveForwardFromBackSensor(24.5);
                 // release cube
                 setClawPos(0.87, 0.13);
                 sleep(100);
                 setDriverMotorPower(-0.25, -0.25, -0.25, -0.25, 300);
                 // move arm back up
-                SET_TARGET_POWER_RUN_DOWN(700, -1.0);
+                SET_TARGET_POWER_RUN(700, -1.0);
                 sleep(200);
                 SET_ARM_POWER_ZERO();
                 // adjust bot so heading is approx. zero
@@ -304,17 +377,18 @@ public class RedDuck extends AutoRobotStruct {
                 setDriverMotorPower(0.5, 0.5, 0.5, 0.5, 135);
                 // turn right
                 turnRight(-20);
+                setDistanceAndMoveForwardFromBackSensor(18);
                 // lower arm
-                SET_TARGET_POWER_RUN_DOWN(-1400, -1.0);
+                SET_TARGET_POWER_RUN(-1690, -0.25);
                 sleep(200);
                 // distance to move forward
-                setDistanceAndMoveForward(10);
+                setDistanceAndMoveForwardFromBackSensor(24.5);
                 // release cube
                 setClawPos(0.87, 0.13);
                 sleep(100);
                 setDriverMotorPower(-0.25, -0.25, -0.25, -0.25, 300);
                 // move arm back up
-                SET_TARGET_POWER_RUN_DOWN(700, -1.0);
+                SET_TARGET_POWER_RUN(700, -1.0);
                 sleep(200);
                 SET_ARM_POWER_ZERO();
                 // adjust bot so heading is approx. zero
@@ -416,6 +490,22 @@ public class RedDuck extends AutoRobotStruct {
                                 + gravity.zAccel*gravity.zAccel)));
     }
 
+    public void startIntakeForSecondPickup(float[] hsvValues, float checkDuration) {
+        // checkDuration is measured in ms
+        long startTime = System.currentTimeMillis();
+        while((hsvValues[0] > 30 && colorSensor.red() < 60) || System.currentTimeMillis() - startTime < checkDuration) {
+            moveIntake(-0.70);
+            // prepare to exit loop if a block is detected
+            if (hsvValues[0] < 30 && colorSensor.red() > 60) {
+                setClawPos(0.95, 0.05);
+                moveIntake(0);
+                setDriverMotorPower(0,0,0,0);
+                sleep(10);
+                break;
+            }
+        }
+    }
+
     public String formatAngle(AngleUnit angleUnit, double angle) {
         return formatDegrees(AngleUnit.DEGREES.fromUnit(angleUnit, angle));
     }
@@ -428,29 +518,14 @@ public class RedDuck extends AutoRobotStruct {
         return parseDouble(formatAngle(angles.angleUnit, angles.firstAngle));
     }
 
-//    public void positionHeadingAtZero() {
-//        // self centering
-//        telemetry.addData("heading", currentPosition);
-//        if (currentPosition > 0.5){
-//            telemetry.addData("heading", currentPosition);
-//            setDriverMotorPower(0.20,-0.20,0.20,-0.20);
-//            currentPosition = getAngle();
-//        }
-//
-//        if (currentPosition < -0.5) {
-//            telemetry.addData("heading", currentPosition);
-//            setDriverMotorPower(-0.20,0.20,-0.20,0.20);
-//            currentPosition = getAngle();
-//        }
-//    }
-
     public void turnRight(double degreesToTurn) {
         double currentPostition = getAngle();
         double intendedPosition = currentPostition + degreesToTurn;
 
         while (currentPostition > intendedPosition) {
             telemetry.update();
-            setDriverMotorPower(0.25,-0.25,0.25,-0.25);
+            double motorpower = 0.03 * java.lang.Math.abs(intendedPosition - currentPostition) + 0.05;
+            setDriverMotorPower(motorpower,-motorpower,motorpower,-motorpower);
             currentPostition = getAngle();
         }
 

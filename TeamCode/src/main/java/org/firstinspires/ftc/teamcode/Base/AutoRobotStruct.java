@@ -1,10 +1,13 @@
 package org.firstinspires.ftc.teamcode.Base;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import android.graphics.Color;
+
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.ColorSensor;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
@@ -23,6 +26,9 @@ public class AutoRobotStruct extends LinearOpMode {
     private DcMotorEx motorArmDuo;
     private DistanceSensor distanceBack;
     private DistanceSensor distanceFront;
+    // accessed in RedDuck.java directly without get/set methods therefore not private vars
+    public ColorSensor colorSensor;
+    public ColorSensor whiteLine;
 
     @Override
     public void runOpMode() throws InterruptedException { }
@@ -42,6 +48,8 @@ public class AutoRobotStruct extends LinearOpMode {
         motorIntake = hardwareMap.get(DcMotorEx.class, "motor intake");
         servoPush = hardwareMap.get(Servo.class, "servo Push");
         servoHold = hardwareMap.get(Servo.class, "servo Hold");
+        colorSensor = hardwareMap.get(ColorSensor.class, "color sensor");
+        whiteLine = hardwareMap.get(ColorSensor.class, "whiteLineDetector");
 
         // reverse direction for this drive train
         motorBackLeft.setDirection(DcMotor.Direction.REVERSE);
@@ -93,12 +101,26 @@ public class AutoRobotStruct extends LinearOpMode {
 
     public void setDistanceAndMoveBackward(double back_distance){
         double distBack = getDistanceBack();
-        telemetry.addData("Dist front ", distBack);
+        telemetry.addData("Dist back ", distBack);
 
         while (distBack > back_distance) {
-            // telemetry.addData("Dist front ", distFront);
             // move back
             setDriverMotorPower(-0.25,-0.25,-0.25,-0.25);
+            distBack = getDistanceBack();
+        }
+
+        setDriverMotorPower(0.0,0.0,0.0,0.0, 10);
+    }
+
+    public void setDistanceAndMoveForwardFromBackSensor(double wallDistance){
+        double distBack = getDistanceBack();
+        telemetry.addData("Dist Back ", distBack);
+        telemetry.update();
+
+        while (distBack < wallDistance) {
+            // telemetry.addData("Dist front ", distFront);
+            // move forward
+            setDriverMotorPower(0.2,0.2,0.2,0.2);
             distBack = getDistanceBack();
         }
 
@@ -118,7 +140,7 @@ public class AutoRobotStruct extends LinearOpMode {
         motorArmDuo.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
-    public void SET_TARGET_POWER_RUN_DOWN(int position, double power) {
+    public void SET_TARGET_POWER_RUN(int position, double power) {
         motorArmDuo.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         motorArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
@@ -140,27 +162,14 @@ public class AutoRobotStruct extends LinearOpMode {
         }
     }
 
-//    public void SET_TARGET_POWER_RUN_UP(int position, double power) {
-//        motorArmDuo.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-//        motorArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-//
-//        motorArmDuo.setTargetPosition(position);
-//        motorArm.setTargetPosition(-position);
-//
-//        motorArmDuo.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-//        motorArmDuo.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-//
-//        motorArm.setPower(-power);
-//        motorArmDuo.setPower(power);
-//
-//        while (motorArmDuo.isBusy()) {
-//            telemetry.addData("left en", motorArm.getCurrentPosition());
-//            telemetry.addData("right en", motorArmDuo.getCurrentPosition());
-//            telemetry.update();
-//
-//            idle();
-//        }
-//    }
+    public void hopeForTheBest() {
+        // get the distance to blocks behind us
+        double distanceToBlocks = getDistanceBack();
+        // back up to blocks and subtract the length of the intake
+        setDistanceAndMoveBackward(distanceToBlocks - 5.5);
+
+
+    }
 
     public void SET_ARM_POWER_ZERO(){
         motorArmDuo.setPower(0);
