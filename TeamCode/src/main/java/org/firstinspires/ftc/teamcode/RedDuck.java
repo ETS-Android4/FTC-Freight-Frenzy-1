@@ -13,8 +13,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
-
 import java.util.Locale;
+
 import static java.lang.Double.parseDouble;
 
 /*******************************************************************
@@ -31,7 +31,6 @@ public class RedDuck extends AutoRobotStruct {
     DuckDetector duckVision = new DuckDetector();
     String position = "NOT FOUND";
     String direction = "LEFT";
-    final double oneEightyDeg = 2 * -78; // used in a full rotation of the bot but takes into account speed and power
     double heading;
     BNO055IMU imu;
     Orientation angles;
@@ -79,6 +78,9 @@ public class RedDuck extends AutoRobotStruct {
             detect();
         }
 
+        // init robot hardware map
+        initRunner();
+
         // initialize values for color sensors (located on arm -> yellow, and bottom -> white)
         final boolean LedOn = true;
         float hsvValuesWhite[] = {0F,0F,0F};
@@ -108,8 +110,7 @@ public class RedDuck extends AutoRobotStruct {
         telemetry.addData("Hue", hsvValues[0]);
         telemetry.update();
 
-        // init robot hardware map and internal expansion hub gyro
-        initRunner();
+        // init internal expansion hub gyro
         parameters.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
         parameters.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
         parameters.calibrationDataFile = "BNO055IMUCalibration.json";
@@ -133,8 +134,7 @@ public class RedDuck extends AutoRobotStruct {
                 telemetry.update();
                 // get initial orientation
                 heading = getAngle();
-//                TODO: revise turnleft ot match turnright
-//                turnRight(90);
+//                TODO: revise turnleft to match turnright
                 // close claw to grab cube
                 setClawPos(0.93, 0.07);
                 // move forward
@@ -146,7 +146,7 @@ public class RedDuck extends AutoRobotStruct {
                 // lower arm
                 SET_TARGET_POWER_RUN(-1250, -0.25);
                 sleep(200);
-                setDistanceAndMoveForwardFromBackSensor(24.5);
+                setDistanceAndMoveForwardFromBackSensor(25.0);
                 // release cube
                 setClawPos(0.87, 0.13);
                 sleep(100);
@@ -234,6 +234,10 @@ public class RedDuck extends AutoRobotStruct {
                     if (hsvValuesWhite[0] < 110) {
                         telemetry.update();
                         setDriverMotorPower(0,0,0,0, 200);
+                        // drop intake
+                        releaseHoldGate();
+                        sleep(1000);
+                        pushIntake();
                         break;
                     }
                 }
@@ -519,14 +523,16 @@ public class RedDuck extends AutoRobotStruct {
     }
 
     public void turnRight(double degreesToTurn) {
-        double currentPostition = getAngle();
-        double intendedPosition = currentPostition + degreesToTurn;
+        double currentPosition = getAngle();
+        double intendedPosition = currentPosition + degreesToTurn;
 
-        while (currentPostition > intendedPosition) {
+        while (currentPosition > intendedPosition) {
             telemetry.update();
-            double motorpower = 0.03 * java.lang.Math.abs(intendedPosition - currentPostition) + 0.05;
-            setDriverMotorPower(motorpower,-motorpower,motorpower,-motorpower);
-            currentPostition = getAngle();
+            double motorPower = 0.6 * (0.03 * java.lang.Math.abs(intendedPosition - currentPosition) + 0.05);
+//            setDriverMotorPower(0.25,-0.25,0.25,-0.25);
+            setDriverMotorPower(motorPower,-motorPower,motorPower,-motorPower);
+
+            currentPosition = getAngle();
         }
 
         setDriverMotorPower(0, 0, 0, 0, 100);
@@ -538,7 +544,9 @@ public class RedDuck extends AutoRobotStruct {
 
         while (currentPosition < intendedPosition) {
             telemetry.update();
-            setDriverMotorPower(-0.25,0.25,-0.25,0.25);
+            double motorPower = 0.6 * (0.03 * java.lang.Math.abs(intendedPosition - currentPosition) + 0.05);
+//            setDriverMotorPower(-0.25,0.25,-0.25,0.25);
+            setDriverMotorPower(motorPower, motorPower, motorPower, motorPower);
             currentPosition = getAngle();
         }
 
@@ -562,7 +570,6 @@ public class RedDuck extends AutoRobotStruct {
                     currentHeading = getAngle();
 
                     if (currentHeading > initialHeading){
-//                        setDriverMotorPower(0.25,-0.25,0.25,-0.25);
                         setDriverMotorPower(-0.35,0.25,0.25,-0.35);
                         currentHeading = getAngle();
                     }

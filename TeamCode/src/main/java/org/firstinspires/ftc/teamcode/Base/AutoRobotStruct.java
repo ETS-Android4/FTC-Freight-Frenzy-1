@@ -191,6 +191,10 @@ public class AutoRobotStruct extends LinearOpMode {
 
     public void pushIntake() {
         servoPush.setPosition(1);
+        sleep(100);
+        servoPush.setPosition(0);
+        sleep(100);
+        servoPush.setPosition(1);
     }
 
     public void resetPushIntake() {

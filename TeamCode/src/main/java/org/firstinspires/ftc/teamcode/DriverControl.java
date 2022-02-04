@@ -5,6 +5,17 @@ import org.firstinspires.ftc.teamcode.Base.RobotStruct;
 
 @TeleOp(name="DriverControl")
 public class DriverControl extends RobotStruct {
+    private void napTime(int milliseconds) {
+        // meant to do the same as sleep() from autonomous but in driver control
+        try {
+            Thread.sleep(milliseconds);
+        } catch (InterruptedException e) {
+            telemetry.addData("STATUS: ", "STOPPED - issue sleeping");
+            telemetry.update();
+            Thread.currentThread().interrupt();
+        }
+    }
+
     @Override
     public void loop() {
 
