@@ -162,15 +162,6 @@ public class AutoRobotStruct extends LinearOpMode {
         }
     }
 
-    public void hopeForTheBest() {
-        // get the distance to blocks behind us
-        double distanceToBlocks = getDistanceBack();
-        // back up to blocks and subtract the length of the intake
-        setDistanceAndMoveBackward(distanceToBlocks - 5.5);
-
-
-    }
-
     public void SET_ARM_POWER_ZERO(){
         motorArmDuo.setPower(0);
         motorArm.setPower(0);

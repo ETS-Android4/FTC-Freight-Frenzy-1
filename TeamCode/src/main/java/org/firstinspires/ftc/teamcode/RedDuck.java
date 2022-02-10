@@ -45,22 +45,16 @@ public class RedDuck extends AutoRobotStruct {
             // inverse position from the box this correlates to because the phone is upside down
             telemetry.addData("Position: ", "RIGHT");
             telemetry.update();
-
             direction = "RIGHT";
-
         } else if (position.equals("RIGHT")) {
             // inverse position from the box this correlates to because the phone is upside down
             telemetry.addData("Position: ", "LEFT");
             telemetry.update();
-
             direction = "LEFT";
-
         } else if (position.equals("MIDDLE")) {
             telemetry.addData("Position: ", "MIDDLE");
             telemetry.update();
-
             direction = "MIDDLE";
-
         } else {
             telemetry.addData("Position: ", "NOT FOUND");
             telemetry.update();
@@ -68,6 +62,8 @@ public class RedDuck extends AutoRobotStruct {
     }
 
     @Override public void runOpMode() {
+        // left (low), middle, right (top)
+        int[] TARGET_POSITIONS = {-1690, 1500, -1250};
         // open cv initialization
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         AutoCVCMD = new InitCV();
@@ -128,346 +124,213 @@ public class RedDuck extends AutoRobotStruct {
         imu.startAccelerationIntegration(new Position(), new Velocity(), 1000);
         // AutoCVCMD.stopStream();
 
+        int KNOWN_POSITION;
         if (direction.equals("RIGHT")) {
-            // constant * (target-current position)
-            while (opModeIsActive()) {
-                telemetry.update();
-                // get initial orientation
-                heading = getAngle();
-//                TODO: revise turnleft to match turnright
-                // close claw to grab cube
-                setClawPos(0.93, 0.07);
-                // move forward
-                setDriverMotorPower(0.5,0.5,0.5,0.5, 135);
-                // turn right
-                turnRight(-20);
-                // distance to move forward
-                setDistanceAndMoveForwardFromBackSensor(18);
-                // lower arm
-                SET_TARGET_POWER_RUN(-1250, -0.25);
-                sleep(200);
-                setDistanceAndMoveForwardFromBackSensor(25.0);
-                // release cube
-                setClawPos(0.87, 0.13);
-                sleep(100);
-                // move arm back up
-                SET_TARGET_POWER_RUN(700, -1.0);
-                sleep(200);
-                SET_ARM_POWER_ZERO();
-                // adjust bot so heading is approx. zero
-                double currentPosition = getAngle();
-                while (currentPosition < -1.0 || currentPosition > 1.0) {
-                    // self centering
-                    telemetry.addData("heading", currentPosition);
-                    telemetry.update();
-                    if (currentPosition > 1.0) {
-                        telemetry.addData("heading", currentPosition);
-                        telemetry.update();
-                        setDriverMotorPower(0.20,-0.20,0.20,-0.20);
-                        currentPosition = getAngle();
-                    }
-
-                    if (currentPosition < -1.0) {
-                        telemetry.addData("heading", currentPosition);
-                        telemetry.update();
-                        setDriverMotorPower(-0.20,0.20,-0.20,0.20);
-                        currentPosition = getAngle();
-                    }
-                }
-                // back up
-                setDistanceAndMoveBackward(6.5);
-                sleep(10);
-                // turn right
-                turnRight(-78);
-                // move back to hit duck dropper
-                setDistanceAndMoveBackward(10);
-                // spin motor
-                setDuckDropperSpeed(0.75, 2000);
-                sleep(10);
-                // move forward
-                setDriverMotorPower(0.5,0.5,0.5,0.5, 500);
-                // adjust bot so heading is approx. zero
-                currentPosition = getAngle();
-                while (currentPosition < -1.0 || currentPosition > 1.0) {
-                    // self centering
-                    telemetry.addData("heading", currentPosition);
-                    telemetry.update();
-                    if (currentPosition > 1.0) {
-                        telemetry.addData("heading", currentPosition);
-                        telemetry.update();
-                        setDriverMotorPower(0.20,-0.20,0.20,-0.20);
-                        currentPosition = getAngle();
-                    }
-
-                    if (currentPosition < -1.0) {
-                        telemetry.addData("heading", currentPosition);
-                        telemetry.update();
-                        setDriverMotorPower(-0.20,0.20,-0.20,0.20);
-                        currentPosition = getAngle();
-                    }
-                }
-                sleep(10);
-                // rotation of the bot so  the intake faces the pit
-                turnLeft(65);
-                // back up to pit
-                setDriverMotorPower(-0.5,-0.5,-0.5,-0.5, 2750);
-                releaseHoldGate();
-                // push down intake
-                pushIntake();
-                resetPushIntake();
-                pushIntake();
-                // translate and correct motion
-                driveThread.start();
-                setDriverMotorPower(-0.25,0.25,0.25,-0.25);
-                sleep(2000);
-                driveThread.interrupt();
-
-                // check for white line on ground
-                while (hsvValuesWhite[0] > 110) {
-                    telemetry.update();
-                    setDriverMotorPower(-0.3,-0.3,-0.3,-0.3);
-                    telemetry.update();
-                    Color.RGBToHSV(whiteLine.red() * 8, whiteLine.green() * 8, whiteLine.blue() * 8, hsvValuesWhite);
-                    telemetry.update();
-
-                    // white line detected! therefore we exit with break
-                    if (hsvValuesWhite[0] < 110) {
-                        telemetry.update();
-                        setDriverMotorPower(0,0,0,0, 200);
-                        // drop intake
-                        releaseHoldGate();
-                        sleep(1000);
-                        pushIntake();
-                        break;
-                    }
-                }
-
-                // close claw while bringing arm down all the way
-                setClawPos(0.98, 0.02);
-                sleep(10);
-                SET_TARGET_POWER_RUN(350, -0.25);
-                sleep(100);
-                // open claw before starting intake for new blocks
-                setClawPos(0.86, 0.14);
-                sleep(10);
-                // back up further towards blocks
-                setDriverMotorPower(-0.3,-0.3,-0.3,-0.3, 1900);
-                telemetry.update();
-                // start intake
-                startIntakeForSecondPickup(hsvValues, 3000);
-                // should only fire if we did not get a block the first time
-                if (hsvValues[0] > 30 && colorSensor.red() < 60) {
-                    // hopefully this will position us so we can pickup a block
-                    hopeForTheBest();
-                    telemetry.update();
-                    startIntakeForSecondPickup(hsvValues, 3000);
-                }
-
-                // force end of while loop
-                requestOpModeStop();
-            }
+            KNOWN_POSITION = TARGET_POSITIONS[2];
+        } else if (direction.equals("MIDDLE")) {
+            KNOWN_POSITION = TARGET_POSITIONS[1];
+        } else {
+            KNOWN_POSITION = TARGET_POSITIONS[0];
         }
 
-        else if (direction.equals("MIDDLE")) {
-            // constant * (target-current position)
-            while (opModeIsActive()) {
+        while (opModeIsActive()) {
+            telemetry.update();
+            // get initial orientation
+            heading = getAngle();
+            // close claw to grab cube
+            setClawPos(0.93, 0.07);
+            // move forward
+            setDriverMotorPower(0.5, 0.5, 0.5, 0.5, 135);
+            // turn right
+            turnRight(-20);
+            // distance to move forward
+            setDistanceAndMoveForwardFromBackSensor(18);
+            // lower arm
+            SET_TARGET_POWER_RUN(KNOWN_POSITION, -0.25);
+            sleep(200);
+            setDistanceAndMoveForwardFromBackSensor(25.0);
+            // release cube
+            setClawPos(0.87, 0.13);
+            sleep(100);
+            // move arm back up
+            SET_TARGET_POWER_RUN(700, -1.0);
+            sleep(200);
+            SET_ARM_POWER_ZERO();
+            // adjust bot so heading is approx. zero
+            double currentPosition = getAngle();
+            while (currentPosition < -1.0 || currentPosition > 1.0) {
+                // self centering
+                telemetry.addData("heading", currentPosition);
                 telemetry.update();
-                // get initial orientation
-                heading = getAngle();
-                // close claw to grab cube
-                setClawPos(0.93, 0.07);
-                // move forward
-                setDriverMotorPower(0.5,0.5,0.5,0.5, 135);
-                // turn right
-                turnRight(-20);
-                sleep(10);
-                setDistanceAndMoveForwardFromBackSensor(18);
-                // lower arm
-                SET_TARGET_POWER_RUN(-1500, -0.25);
-                sleep(200);
-                // distance to move forward
-                setDistanceAndMoveForwardFromBackSensor(24.5);
-                // release cube
-                setClawPos(0.87, 0.13);
-                sleep(100);
-                setDriverMotorPower(-0.25, -0.25, -0.25, -0.25, 300);
-                // move arm back up
-                SET_TARGET_POWER_RUN(700, -1.0);
-                sleep(200);
-                SET_ARM_POWER_ZERO();
-                // adjust bot so heading is approx. zero
-                double currentPosition = getAngle();
-                while (currentPosition < -1.0 || currentPosition > 1.0) {
-                    // self centering
+                if (currentPosition > 1.0) {
                     telemetry.addData("heading", currentPosition);
                     telemetry.update();
-                    if (currentPosition > 1.0) {
-                        telemetry.addData("heading", currentPosition);
-                        telemetry.update();
-                        setDriverMotorPower(0.20,-0.20,0.20,-0.20);
-                        currentPosition = getAngle();
-                    }
-
-                    if (currentPosition < -1.0) {
-                        telemetry.addData("heading", currentPosition);
-                        telemetry.update();
-                        setDriverMotorPower(-0.20,0.20,-0.20,0.20);
-                        currentPosition = getAngle();
-                    }
+                    setDriverMotorPower(0.20, -0.20, 0.20, -0.20);
+                    currentPosition = getAngle();
                 }
-                // back up
-                setDistanceAndMoveBackward(6.5);
-                sleep(10);
-                // turn right
-                turnRight(-78);
-                // move back to hit duck dropper
-                setDistanceAndMoveBackward(10);
-                // spin motor
-                setDuckDropperSpeed(0.75, 2000);
-                sleep(10);
-                // move forward
-                setDriverMotorPower(0.5,0.5,0.5,0.5, 500);
-                // adjust bot so heading is approx. zero
-                currentPosition = getAngle();
-                while (currentPosition < -1.0 || currentPosition > 1.0) {
-                    // self centering
+
+                if (currentPosition < -1.0) {
                     telemetry.addData("heading", currentPosition);
                     telemetry.update();
-                    if (currentPosition > 1.0) {
-                        telemetry.addData("heading", currentPosition);
-                        telemetry.update();
-                        setDriverMotorPower(0.20,-0.20,0.20,-0.20);
-                        currentPosition = getAngle();
-                    }
-
-                    if (currentPosition < -1.0) {
-                        telemetry.addData("heading", currentPosition);
-                        telemetry.update();
-                        setDriverMotorPower(-0.20,0.20,-0.20,0.20);
-                        currentPosition = getAngle();
-                    }
+                    setDriverMotorPower(-0.20, 0.20, -0.20, 0.20);
+                    currentPosition = getAngle();
                 }
-                sleep(10);
-                // rotation of the bot so  the intake faces the pit
-                turnLeft(65);
-                // back up to pit
-                setDriverMotorPower(-0.5,-0.5,-0.5,-0.5, 2750);
-                releaseHoldGate();
-                // push down intake
-                pushIntake();
-                resetPushIntake();
-                pushIntake();
-                // translate and correct motion
-                driveThread.start();
-                setDriverMotorPower(-0.25,0.25,0.25,-0.25);
-                sleep(2000);
-                driveThread.interrupt();
-//                correctionThread.interrupt();
-                setDriverMotorPower(-0.5,-0.5,-0.5,-0.5, 2500);
-                // force end of while loop
-                requestOpModeStop();
             }
-        }
-
-        else {
-            // constant * (target-current position)
-            while (opModeIsActive()) {
+            // back up
+            setDistanceAndMoveBackward(6.25);
+            sleep(10);
+            // turn right
+            turnRight(-78);
+            // move back to hit duck dropper
+            setDistanceAndMoveBackward(10.5);
+            // spin motor
+            setDuckDropperSpeed(0.75, 3200);
+            sleep(10);
+            // move forward
+            setDriverMotorPower(0.5, 0.5, 0.5, 0.5, 500);
+            // adjust bot so heading is approx. zero
+            currentPosition = getAngle();
+            while (currentPosition < -1.0 || currentPosition > 1.0) {
+                // self centering
+                telemetry.addData("heading", currentPosition);
                 telemetry.update();
-                // get initial orientation
-                heading = getAngle();
-                // close claw to grab cube
-                setClawPos(0.93, 0.07);
-                // move forward
-                setDriverMotorPower(0.5, 0.5, 0.5, 0.5, 135);
-                // turn right
-                turnRight(-20);
-                setDistanceAndMoveForwardFromBackSensor(18);
-                // lower arm
-                SET_TARGET_POWER_RUN(-1690, -0.25);
-                sleep(200);
-                // distance to move forward
-                setDistanceAndMoveForwardFromBackSensor(24.5);
-                // release cube
-                setClawPos(0.87, 0.13);
-                sleep(100);
-                setDriverMotorPower(-0.25, -0.25, -0.25, -0.25, 300);
-                // move arm back up
-                SET_TARGET_POWER_RUN(700, -1.0);
-                sleep(200);
-                SET_ARM_POWER_ZERO();
-                // adjust bot so heading is approx. zero
-                double currentPosition = getAngle();
-                while (currentPosition < -1.0 || currentPosition > 1.0) {
-                    // self centering
+                if (currentPosition > 1.0) {
                     telemetry.addData("heading", currentPosition);
                     telemetry.update();
-                    if (currentPosition > 1.0) {
-                        telemetry.addData("heading", currentPosition);
-                        telemetry.update();
-                        setDriverMotorPower(0.20, -0.20, 0.20, -0.20);
-                        currentPosition = getAngle();
-                    }
-
-                    if (currentPosition < -1.0) {
-                        telemetry.addData("heading", currentPosition);
-                        telemetry.update();
-                        setDriverMotorPower(-0.20, 0.20, -0.20, 0.20);
-                        currentPosition = getAngle();
-                    }
+                    setDriverMotorPower(0.15, -0.15, 0.15, -0.15);
+                    currentPosition = getAngle();
                 }
-                // back up
-                setDistanceAndMoveBackward(6.5);
-                sleep(10);
-                // turn right
-                turnRight(-78);
-                // move back to hit duck dropper
-                setDistanceAndMoveBackward(10);
-                // spin motor
-                setDuckDropperSpeed(0.75, 2000);
-                sleep(10);
-                // move forward
-                setDriverMotorPower(0.5, 0.5, 0.5, 0.5, 500);
-                // adjust bot so heading is approx. zero
-                currentPosition = getAngle();
-                while (currentPosition < -1.0 || currentPosition > 1.0) {
-                    // self centering
+
+                if (currentPosition < -1.0) {
                     telemetry.addData("heading", currentPosition);
                     telemetry.update();
-                    if (currentPosition > 1.0) {
-                        telemetry.addData("heading", currentPosition);
-                        telemetry.update();
-                        setDriverMotorPower(0.20, -0.20, 0.20, -0.20);
-                        currentPosition = getAngle();
-                    }
-
-                    if (currentPosition < -1.0) {
-                        telemetry.addData("heading", currentPosition);
-                        telemetry.update();
-                        setDriverMotorPower(-0.20, 0.20, -0.20, 0.20);
-                        currentPosition = getAngle();
-                    }
+                    setDriverMotorPower(-0.15, 0.15, -0.15, 0.15);
+                    currentPosition = getAngle();
                 }
-                sleep(10);
-                // rotation of the bot so  the intake faces the pit
-                turnLeft(65);
-                // TODO: ADD TRANSLATE TOWARDS WALL ON NEXT LINE-> CHECK DIRECTION TO TURN
-                // back up to pit
-                setDriverMotorPower(-0.5, -0.5, -0.5, -0.5, 2750);
-                releaseHoldGate();
-                // push down intake
-                pushIntake();
-                resetPushIntake();
-                pushIntake();
-                // translate and correct motion
-                driveThread.start();
-                setDriverMotorPower(-0.25, 0.25, 0.25, -0.25);
-                sleep(2000);
-                driveThread.interrupt();
-//                correctionThread.interrupt();
-                setDriverMotorPower(-0.5, -0.5, -0.5, -0.5, 2500);
-                // force end of while loop
-                requestOpModeStop();
             }
+            sleep(10);
+            // rotation of the bot so  the intake faces the pit
+            turnLeft(70);
+            // back up to pit
+            setDriverMotorPower(-0.5, -0.5, -0.5, -0.5, 2750);
+            // translate and correct motion
+            driveThread.start();
+            setDriverMotorPower(-0.25, 0.25, 0.25, -0.25);
+            sleep(2000);
+            driveThread.interrupt();
+
+            // check for white line on ground
+            while (hsvValuesWhite[0] > 110) {
+                telemetry.update();
+                setDriverMotorPower(-0.3, -0.3, -0.3, -0.3);
+                telemetry.update();
+                Color.RGBToHSV(whiteLine.red() * 8, whiteLine.green() * 8, whiteLine.blue() * 8, hsvValuesWhite);
+                telemetry.update();
+
+                // white line detected! therefore we exit with break
+                if (hsvValuesWhite[0] < 110) {
+                    telemetry.update();
+                    setDriverMotorPower(0, 0, 0, 0, 200);
+                    // drop intake
+                    releaseHoldGate();
+                    sleep(1000);
+                    pushIntake();
+                    resetPushIntake();
+                    pushIntake();
+                    break;
+                }
+            }
+
+            // close claw while bringing arm down all the way
+            setClawPos(0.98, 0.02);
+            sleep(10);
+            SET_TARGET_POWER_RUN(750, -0.5);
+            sleep(100);
+            // open claw before starting intake for new blocks
+            setClawPos(0.86, 0.14);
+            sleep(10);
+            // back up further towards blocks
+            setDriverMotorPower(-0.3, -0.3, -0.3, -0.3, 2200);
+            telemetry.update();
+            // start intake
+            startIntakeForSecondPickup(hsvValues, 5000);
+            // should only fire if we did not get a block the first time
+            if (hsvValues[0] > 30 && colorSensor.red() < 60) {
+                sleep(1000);
+                // hopefully this will position us so we can pickup a block
+                // get the distance to blocks behind us
+                double distanceToBlocks = getDistanceBack();
+                // back up to blocks and subtract the length of the intake
+                setDistanceAndMoveBackward(distanceToBlocks);
+                telemetry.update();
+                startIntakeForSecondPickup(hsvValues, 5000);
+            }
+
+            setDriverMotorPower(0.75, 0.75, 0.75, 0.75, 1100);
+            // translate right
+            setDriverMotorPower(-0.20, 0.20, 0.20, -0.20, 900);
+            turnRight(-78);
+            // close claw to grab cube
+            setClawPos(0.93, 0.07);
+            // move arm down the original + the distance that we moved back to the intake
+            SET_TARGET_POWER_RUN(KNOWN_POSITION, -0.25);
+            sleep(20);
+            setDistanceAndMoveForwardFromBackSensor(16);
+            // open claw to release block
+            setClawPos(0.87, 0.13);
+            // move arm back up
+            SET_TARGET_POWER_RUN(700, -0.50);
+            // parking back in pit
+            // adjust bot so heading is approx. zero
+            currentPosition = getAngle();
+            while (currentPosition < -1.0 || currentPosition > 1.0) {
+                // self centering
+                telemetry.addData("heading", currentPosition);
+                telemetry.update();
+                if (currentPosition > 1.0) {
+                    telemetry.addData("heading", currentPosition);
+                    telemetry.update();
+                    setDriverMotorPower(0.15, -0.15, 0.15, -0.15);
+                    currentPosition = getAngle();
+                }
+
+                if (currentPosition < -1.0) {
+                    telemetry.addData("heading", currentPosition);
+                    telemetry.update();
+                    setDriverMotorPower(-0.15, 0.15, -0.15, 0.15);
+                    currentPosition = getAngle();
+                }
+            }
+            sleep(10);
+            // rotation of the bot so  the intake faces the pit
+            turnLeft(70);
+            // back up to pit
+            setDriverMotorPower(-0.5, -0.5, -0.5, -0.5, 2750);
+            // translate and correct motion
+            driveThread.start();
+            setDriverMotorPower(-0.25, 0.25, 0.25, -0.25);
+            sleep(2000);
+            driveThread.interrupt();
+
+            // check for white line on ground
+            while (hsvValuesWhite[0] > 110) {
+                telemetry.update();
+                setDriverMotorPower(-0.3, -0.3, -0.3, -0.3);
+                telemetry.update();
+                Color.RGBToHSV(whiteLine.red() * 8, whiteLine.green() * 8, whiteLine.blue() * 8, hsvValuesWhite);
+                telemetry.update();
+
+                // white line detected! therefore we exit with break
+                if (hsvValuesWhite[0] < 110) {
+                    telemetry.update();
+                    setDriverMotorPower(0, 0, 0, 0, 200);
+                    break;
+                }
+            }
+
+            setDriverMotorPower(0.30, 0.30, 0.30, 0.30, 450);
+
+            break;
         }
     }
 
@@ -501,8 +364,9 @@ public class RedDuck extends AutoRobotStruct {
             moveIntake(-0.70);
             // prepare to exit loop if a block is detected
             if (hsvValues[0] < 30 && colorSensor.red() > 60) {
-                setClawPos(0.95, 0.05);
                 moveIntake(0);
+                sleep(200);
+                setClawPos(0.95, 0.05);
                 setDriverMotorPower(0,0,0,0);
                 sleep(10);
                 break;
@@ -528,9 +392,9 @@ public class RedDuck extends AutoRobotStruct {
 
         while (currentPosition > intendedPosition) {
             telemetry.update();
-            double motorPower = 0.6 * (0.03 * java.lang.Math.abs(intendedPosition - currentPosition) + 0.05);
-//            setDriverMotorPower(0.25,-0.25,0.25,-0.25);
-            setDriverMotorPower(motorPower,-motorPower,motorPower,-motorPower);
+//            double motorPower = 0.6 * (0.03 * java.lang.Math.abs(intendedPosition - currentPosition) + 0.05);
+            setDriverMotorPower(0.25,-0.25,0.25,-0.25);
+//            setDriverMotorPower(motorPower,-motorPower,motorPower,-motorPower);
 
             currentPosition = getAngle();
         }
@@ -544,9 +408,9 @@ public class RedDuck extends AutoRobotStruct {
 
         while (currentPosition < intendedPosition) {
             telemetry.update();
-            double motorPower = 0.6 * (0.03 * java.lang.Math.abs(intendedPosition - currentPosition) + 0.05);
-//            setDriverMotorPower(-0.25,0.25,-0.25,0.25);
-            setDriverMotorPower(motorPower, motorPower, motorPower, motorPower);
+//            double motorPower = 0.6 * (0.03 * java.lang.Math.abs(intendedPosition - currentPosition) + 0.05);
+            setDriverMotorPower(-0.25,0.25,-0.25,0.25);
+//            setDriverMotorPower(motorPower, motorPower, motorPower, motorPower);
             currentPosition = getAngle();
         }
 

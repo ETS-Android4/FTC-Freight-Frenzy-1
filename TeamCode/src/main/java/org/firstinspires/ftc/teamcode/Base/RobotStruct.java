@@ -1,9 +1,21 @@
 package org.firstinspires.ftc.teamcode.Base;
+import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
+
+import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+
+import java.util.Locale;
+
+import static java.lang.Double.parseDouble;
 
 public class RobotStruct extends OpMode {
     DcMotor motorFrontRight;
@@ -18,6 +30,9 @@ public class RobotStruct extends OpMode {
     Servo servoClaw2;
     Servo servoPush;
     Servo servoHold;
+    BNO055IMU imu;
+    Orientation angles;
+    Acceleration gravity;
 
     @Override
     public void init() {
@@ -39,6 +54,20 @@ public class RobotStruct extends OpMode {
 
         motorBackRight.setDirection(DcMotor.Direction.REVERSE);
         motorFrontRight.setDirection(DcMotor.Direction.REVERSE);
+
+        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
+
+        // init internal expansion hub gyro
+        parameters.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
+        parameters.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
+        parameters.calibrationDataFile = "BNO055IMUCalibration.json";
+        parameters.loggingEnabled      = true;
+        parameters.loggingTag          = "IMU";
+        parameters.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
+        imu = hardwareMap.get(BNO055IMU.class, "imu");
+        imu.initialize(parameters);
+
+        composeTelemetry();
     }
 
     @Override
@@ -150,7 +179,38 @@ public class RobotStruct extends OpMode {
         servoPush.setPosition(pushPosition);
     }
 
-//    public void DropGateAndPush(double holdPosition, double pushPosition) {
-//
-//    }
+    void composeTelemetry() {
+        telemetry.addAction(() -> {
+            angles   = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+            gravity  = imu.getGravity();
+        });
+
+        telemetry.addLine()
+                .addData("status", () -> imu.getSystemStatus().toShortString())
+                .addData("calib", () -> imu.getCalibrationStatus().toString());
+
+        telemetry.addLine()
+                .addData("heading", () -> formatAngle(angles.angleUnit, angles.firstAngle))
+                .addData("roll", () -> formatAngle(angles.angleUnit, angles.secondAngle))
+                .addData("pitch", () -> formatAngle(angles.angleUnit, angles.thirdAngle));
+
+        telemetry.addLine()
+                .addData("grvty", () -> gravity.toString())
+                .addData("mag", () -> String.format(Locale.getDefault(), "%.3f",
+                        Math.sqrt(gravity.xAccel*gravity.xAccel
+                                + gravity.yAccel*gravity.yAccel
+                                + gravity.zAccel*gravity.zAccel)));
+    }
+
+    public String formatAngle(AngleUnit angleUnit, double angle) {
+        return formatDegrees(AngleUnit.DEGREES.fromUnit(angleUnit, angle));
+    }
+
+    public String formatDegrees(double degrees){
+        return String.format(Locale.getDefault(), "%.1f", AngleUnit.DEGREES.normalize(degrees));
+    }
+
+    public double getAngle() {
+        return parseDouble(formatAngle(angles.angleUnit, angles.firstAngle));
+    }
 }
